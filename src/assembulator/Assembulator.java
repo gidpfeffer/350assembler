@@ -1,4 +1,4 @@
-package main;
+package assembulator;
 
 import java.util.*;
 import java.util.Scanner;
@@ -16,7 +16,7 @@ import java.io.*;
  * 
  * @author pf51, ghb5
  **/
-public class Assembulator {
+public class Assembulator implements Assembler{
 
 	private static final String ADDR_RADIX = "ADDRESS_RADIX = DEC;";
 	private static final String DATA_RADIX = "DATA_RADIX = BIN;";
@@ -27,40 +27,39 @@ public class Assembulator {
 	private static final int DEPTH = 4096;
 	private static final int WIDTH = 32;
 
-	private static final String MIPS_FILE = "./resources/mips.txt";
 	private static final int NOP_PAD = 1;
 
 	private List<String> _RawAssembly;
 	private Map<String, Integer> _JumpTargets;
 
-	public Assembulator() {
+	public Assembulator(String filename) {
 		_RawAssembly = new ArrayList<>();
 		_JumpTargets = new HashMap<>();
 
-		File codeFile = new File(MIPS_FILE);
+		loadFile(filename);
+	}
 
+	@Override
+	public void writeTo(OutputStream os) {
+		List<String> filteredCode = filterCode(_RawAssembly);
+		List<String> parsedCode = parseCode(filteredCode);		
+		writeCode(new PrintStream(os), filteredCode, parsedCode);
+	}
+	
+	private void loadFile(String filename) {
+		File file = new File(filename);		
+		
 		Scanner codeScan;
 		try {
-			codeScan = new Scanner(codeFile);
+			codeScan = new Scanner(file);
 			while (codeScan.hasNextLine()) {
 				_RawAssembly.add(codeScan.nextLine());
 			}
 			codeScan.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("File not found");
+			System.err.println("Error - File not found!: " + filename);
 			System.exit(1);
 		}
-	}
-
-	/**
-	 * Writes assembly code to output stream
-	 * 
-	 * @param os is the outputstream
-	 */
-	public void writeTo(OutputStream os) {
-		List<String> filteredCode = filterCode(_RawAssembly);
-		List<String> parsedCode = parseCode(filteredCode);		
-		printCode(new PrintStream(os), filteredCode, parsedCode);
 	}
 
 	/**
@@ -91,8 +90,14 @@ public class Assembulator {
 														.filter(EmptyAndCommentOnlyLines)
 														.collect(Collectors.toList());
 
-		for (int i = 0; i < filteredCode.size(); i++) {
-			String line = filteredCode.get(i);
+		trimTargetsFromCode(filteredCode);
+
+		return filteredCode;
+	}
+	
+	private void trimTargetsFromCode(List<String> code) {
+		for (int i = 0; i < code.size(); i++) {
+			String line = code.get(i);
 			if (line.contains(":")) {
 				String[] splitLine 	= line.split(":\\s+"); // Split by colon and spaces
 				String command 		= splitLine[1];
@@ -100,14 +105,12 @@ public class Assembulator {
 
 				// trim target tag from command
 				// store address of target tag
-				filteredCode.set(i, command);
+				code.set(i, command);
 				_JumpTargets.put(target, i);
 			}
 		}
-
-		return filteredCode;
 	}
-
+	
 	/**
 	 * Takes filtered code and converts it to assembly, as well as 
 	 * replaces branch targets with address lines.
@@ -131,13 +134,17 @@ public class Assembulator {
 	}
 
 	/**
+	 * Writes code to stream
+	 * 
 	 * @param filteredCode
 	 * @param parsedCode
 	 */
-	private void printCode(PrintStream ps, List<String> filteredCode, List<String> parsedCode) {
-		Map<Integer, String> reverseTargets = new HashMap<>();
-		_JumpTargets.forEach((s, i) -> reverseTargets.put(i, s));
+	private void writeCode(PrintStream ps, List<String> filteredCode, List<String> parsedCode) {
+		writeHeader(ps);
+		writeContent(ps, filteredCode, parsedCode);
+	}
 
+	private void writeHeader(PrintStream ps) {
 		// Print Header
 		String n = System.lineSeparator();
 		ps.printf(DEPTH_FORMAT + n, DEPTH);
@@ -147,13 +154,19 @@ public class Assembulator {
 		ps.println(ADDR_RADIX);
 		ps.println(DATA_RADIX);
 		ps.println();
+	}
+	
+	private void writeContent(PrintStream ps, List<String> filtCode, List<String> parseCode) {
+		String n = System.lineSeparator();
 
-		// Print Content
 		ps.println("CONTENT");
 		ps.println("BEGIN");
+		
+		Map<Integer, String> reverseTargets = new HashMap<>();
+		_JumpTargets.forEach((s, i) -> reverseTargets.put(i, s));
 
-		for (int i = 0; i < filteredCode.size(); i++) {
-			String rawLine = filteredCode.get(i);
+		for (int i = 0; i < filtCode.size(); i++) {
+			String rawLine = filtCode.get(i);
 
 			if (!reverseTargets.containsKey(i)) {
 				ps.printf("%4s-- %s%s", "", rawLine, n);
@@ -163,17 +176,11 @@ public class Assembulator {
 			}
 
 			int address = NOP_PAD*i;
-			String instrCode = parsedCode.get(i);
+			String instrCode = parseCode.get(i);
 			ps.printf("%04d : %s;%s", address, instrCode, n);
 		}
 		
-		ps.printf("[%d..%d] : %032d;%s", filteredCode.size(), 307200, 0, n);
+		ps.printf("[%d..%d] : %032d;%s", filtCode.size(), 307200, 0, n);
 		ps.println("END;");
 	}
-
-	public static void main(String[] args) {
-		Assembulator a = new Assembulator();
-		a.writeTo(System.out);
-	}
-
 }
