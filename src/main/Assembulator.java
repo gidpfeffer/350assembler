@@ -1,7 +1,12 @@
+package main;
+
 import java.util.*;
 import java.util.Scanner;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import instructions.InstructionType;
+import parsing.Parser;
 
 import java.io.*;
 
@@ -13,198 +18,143 @@ import java.io.*;
  **/
 public class Assembulator {
 
-	private Map<String, String[]> instructions;
+	private static final String ADDR_RADIX = "ADDRESS_RADIX = DEC;";
+	private static final String DATA_RADIX = "DATA_RADIX = BIN;";
+
+	private static final String DEPTH_FORMAT = "DEPTH = %d;";
+	private static final String WIDTH_FORMAT = "WIDTH = %d;";
+
+	private static final int DEPTH = 4096;
+	private static final int WIDTH = 32;
+
+	private static final String MIPS_FILE = "./resources/mips.txt";
+
+	private List<String> code;
+	private Map<String, Integer> targets;
 
 	public Assembulator() {
+		code = new ArrayList<>();
+		targets = new HashMap<>();
 
-		instructions = new HashMap<String, String[]>();
-		setupInstructionsMap();
+		File codeFile = new File(MIPS_FILE);
 
-	}
-
-	// PARSING
-
-	// convert assembly into machine code
-	private void mipsParser() {
-
-		Scanner sc = null;
+		Scanner codeScan;
 		try {
-			sc = new Scanner(new File("mips.txt"));
-		} catch (Exception e) {
-			System.out.println("File not found");
-		}
-
-		int counter = 0;
-		printHeader();
-
-		Collection<String> document = new ArrayList<>();
-
-		while (sc.hasNextLine()) {
-			document.add(sc.nextLine());
-		}
-
-		for (String line : document) {
-			if (!line.contains("#") && !line.isEmpty()) {
-
-				String[] split_line = line.split("[,\\s]+");
-				String instruction = split_line[0];
-
-				System.out.printf("%4s-- %s\n", "", line);
-				System.out.printf("%4s : ", counter);
-
-				// get type
-				InstructionType type = Instruction.getByName(instruction).type;
-				printOpcode(instruction);
-
-				// print rest of instruction
-				printInstruction(split_line, type);
-				System.out.println(";");
-				counter++;
+			codeScan = new Scanner(codeFile);
+			while (codeScan.hasNextLine()) {
+				code.add(codeScan.nextLine());
 
 			}
-
-		}
-
-		printFooter();
-
-	}
-
-
-	/*************************
-	 *
-	 * SETUP
-	 *
-	 **************************/
-
-	// setup instruction file
-	private void setupInstructionsMap() {
-
-		Scanner sc = null;
-		String filename = "instruction_codes.txt";
-
-		try {
-			sc = new Scanner(new File(filename));
-		} catch (Exception e) {
+			codeScan.close();
+		} catch (FileNotFoundException e) {
 			System.out.println("File not found");
+			System.exit(1);
 		}
-
-		while (sc.hasNextLine()) {
-			String line = sc.nextLine();
-			String[] split_line = line.split("[,\\s]+");
-			String instruction = split_line[0];
-			String[] info = split_line[1].split(":");
-			instructions.put(instruction, info);
-		}
-
 	}
 
-	/*************************
-	 *
-	 * PRINTING METHODS
-	 *
-	 **************************/
+	public void run() {
+		List<String> filteredCode = filterCode(code);
+		List<String> parsedCode = parseCode(filteredCode);
 
-	// print instruction
-	private void printInstruction(String[] input, InstructionType type) {
+		printCode(filteredCode, parsedCode);
+	}
 
-		switch (type) {
-		case R:
-			printReg(input[1]); // rd
-			printReg(input[2]); // rs
-			printReg(input[3]); // rt
-			printReg(input[4]); // shamt
-			printALUOpcode(input); // ALU_op
-			printZeros(2); // zeros
-			break;
-		case I:
-			if (input.length == 4) {
-				printReg(input[1]); // rd
-				printReg(input[2]); // rs
-				printImmediate(input[3]); // N
+	private List<String> filterCode(List<String> rawAssembly) {
+
+		Predicate<String> ignoreLine = s -> {
+			// Ignore comments
+			s = s.split("\\#")[0];
+
+			// Split by commas
+			String[] split = s.split("[,\\s]+");
+
+			// Must have at least one command
+			return split.length > 1 && !split[0].isEmpty();
+		};
+
+		Function<String, String> convertTarget = s -> {
+			if (!s.contains(":")) {
+				return s;
+			}
+
+			if (s.split(":").length == 2) {
+				return s;
+			}
+			
+			return s + " nop";
+		};
+
+		List<String> filteredCode = rawAssembly.stream().map(convertTarget).filter(ignoreLine::test).collect(Collectors.toList());
+		
+		for(int i = 0; i < filteredCode.size(); i++) {
+			String line = filteredCode.get(i);
+			if(line.contains(":")) {
+				String[] splitLine = line.split(":\\s+");
+				String command = splitLine[1];
+				String target = splitLine[0];
+				
+				filteredCode.set(i, command);
+				targets.put(target, i);
+			}
+		}
+		
+		return filteredCode;
+		
+	}
+
+	private List<String> parseCode(List<String> filteredCode) {
+		
+		Function<String, String> targetReplacer = s -> {
+				if (!s.matches("\\d+[a-zA-z]+")) {
+					return s;
+				}
+				
+				
+				String encoding = s.replaceAll("[a-zA-Z]", "");
+				int address = targets.get(s.replaceAll("\\d", ""));
+				
+				return encoding + Parser.toBinary(address, 27);
+		};
+	
+		return filteredCode.parallelStream().map(Parser::parseLine).map(targetReplacer).collect(Collectors.toList());
+	}
+
+	private void printCode(List<String> filteredCode, List<String> parsedCode) {
+		Map<Integer, String> reverseTargets = new HashMap<>();
+		targets.forEach((s, i) -> reverseTargets.put(i, s));
+
+		String n = System.lineSeparator();
+		System.out.printf(DEPTH_FORMAT + n, DEPTH);
+		System.out.printf(WIDTH_FORMAT + n, WIDTH);
+		System.out.println();
+
+		System.out.println(ADDR_RADIX);
+		System.out.println(DATA_RADIX);
+		System.out.println();
+
+		System.out.println("CONTENT");
+		System.out.println("BEGIN");
+
+		for (int i = 0; i < filteredCode.size(); i++) {
+
+			String rawLine = filteredCode.get(i);
+
+			if (!reverseTargets.containsKey(i)) {
+				System.out.printf("%" + 4 + "s-- %s\n", "", rawLine);
 			} else {
-				printReg(input[1]); // rd
-				String[] x = input[2].split("\\(");
-				printReg(x[1].substring(0, x[1].length() - 1)); // rs
-				printImmediate(x[0]); // N
+				String target = reverseTargets.get(i);
+				System.out.printf("%" + 4 + "s-- %s: %s\n", "", target, rawLine);
 			}
-			break;
-		case JI:
-			printBinary(input[1], 27); // T
-			break;
-		default:
-			printReg(input[1]);
-			printZeros(22);
-			break;
+
+			System.out.printf("%4d : %s;\n", i, parsedCode.get(i));
 		}
+
+		System.out.println("END;");
 	}
 
-	private void printImmediate(String i) {
-		printBinary(i, 17);
-
-	}
-
-	// print ALU opcode
-	private void printALUOpcode(String[] input) {
-
-		String instruction = input[0];
-		String[] data = instructions.get(instruction);
-		String ALU_opcode = data[2];
-		System.out.print(ALU_opcode);
-
-	}
-
-	private void printZeros(int x) {
-		System.out.print(getZeroString(x));
-	}
-
-	private String getZeroString(int x) {
-		return String.join("", Collections.nCopies(x, "0"));
-	}
-
-	// prints register value or N
-	private void printReg(String v) {
-
-		String reg = Parser.parseRegister(v);
-		String out = Parser.toBinary(reg, 5);
-
-		System.out.print(out);
-	}
-
-	// prints binary representation of b, with d digits length
-	private void printBinary(String b, int d) {
-		System.out.print(Parser.toBinary(b, d));
-	}
-
-	// given instruction, print opcode
-	private void printOpcode(String i) {
-		String[] info = instructions.get(i);
-		System.out.print(info[1]);
-	}
-
-	// print header
-	private void printHeader() {
-
-		System.out.println();
-		String[] header = { "DEPTH = 4096;", "WIDTH = 32;", "ADDRESS_RADIX = DEC;", "DATA_RADIX = BIN;", "CONTENT",
-				"BEGIN" };
-		for (String s : header) {
-			System.out.println(s);
-		}
-		System.out.println();
-
-	}
-
-	// print footer
-	private void printFooter() {
-		System.out.println("\nEND\n");
-	}
-
-	// run
 	public static void main(String[] args) {
-
 		Assembulator a = new Assembulator();
-		a.mipsParser();
-
+		a.run();
 	}
 
 }

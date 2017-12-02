@@ -7,7 +7,7 @@ public class Parser {
 
 	private static final int MAX_SHAMT = (1 << 5) -1 ;
 	
-	static String parseLine(String line) {
+	public static String parseLine(String line) {
 		
 		// Ignore comments
 		line = line.split("\\#")[0];
@@ -31,6 +31,11 @@ public class Parser {
 		default: 	return "";
 		}
 		
+	}
+	
+	public boolean ignoreLine(String line) {
+		
+		return false;
 	}
 	
 	static String parseJIIType(String[] splitLine, Instruction instr) {
@@ -221,7 +226,7 @@ public class Parser {
 		return regNum;
 	}
 	
-	static String toBinary(int b, int d) {
+	public static String toBinary(int b, int d) {
 		String output = "";
 
 		for (int i = d - 1; i >= 0; i--) {
