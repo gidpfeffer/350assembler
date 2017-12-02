@@ -28,13 +28,14 @@ public class Assembulator {
 	private static final int WIDTH = 32;
 
 	private static final String MIPS_FILE = "./resources/mips.txt";
+	private static final int NOP_PAD = 1;
 
-	private List<String> code;
-	private Map<String, Integer> targets;
+	private List<String> _RawAssembly;
+	private Map<String, Integer> _JumpTargets;
 
 	public Assembulator() {
-		code = new ArrayList<>();
-		targets = new HashMap<>();
+		_RawAssembly = new ArrayList<>();
+		_JumpTargets = new HashMap<>();
 
 		File codeFile = new File(MIPS_FILE);
 
@@ -42,8 +43,7 @@ public class Assembulator {
 		try {
 			codeScan = new Scanner(codeFile);
 			while (codeScan.hasNextLine()) {
-				code.add(codeScan.nextLine());
-
+				_RawAssembly.add(codeScan.nextLine());
 			}
 			codeScan.close();
 		} catch (FileNotFoundException e) {
@@ -52,109 +52,128 @@ public class Assembulator {
 		}
 	}
 
-	public void run() {
-		List<String> filteredCode = filterCode(code);
-		List<String> parsedCode = parseCode(filteredCode);
-
-		printCode(filteredCode, parsedCode);
+	/**
+	 * Writes assembly code to output stream
+	 * 
+	 * @param os is the outputstream
+	 */
+	public void writeTo(OutputStream os) {
+		List<String> filteredCode = filterCode(_RawAssembly);
+		List<String> parsedCode = parseCode(filteredCode);		
+		printCode(new PrintStream(os), filteredCode, parsedCode);
 	}
 
+	/**
+	 * Takes raw assembly file line by line and filters out to instructions
+	 * 
+	 * @param rawAssembly code list
+	 * @return filtered assembly code
+	 */
 	private List<String> filterCode(List<String> rawAssembly) {
 
-		Predicate<String> ignoreLine = s -> {
-			// Ignore comments
-			s = s.split("\\#")[0];
-
-			// Split by commas
-			String[] split = s.split("[,\\s]+");
-
-			// Must have at least one command
-			return split.length > 1 && !split[0].isEmpty();
+		Predicate<String> EmptyAndCommentOnlyLines = s -> {
+			// Ignore comments and then split by comma/spaces
+			String[] split = s.split("\\#")[0].split("[,\\s]+");
+			boolean atLeastOneCommand = split.length > 1 && !split[0].isEmpty();
+			return atLeastOneCommand;
 		};
 
-		Function<String, String> convertTarget = s -> {
-			if (!s.contains(":")) {
+		Function<String, String> addNopToEmptyTargetLines = s -> {
+			boolean hasColon = s.contains(":");
+			boolean canSplitByColon = s.split(":\\s+").length == 2;
+			if (!hasColon || canSplitByColon) {
 				return s;
 			}
-
-			if (s.split(":").length == 2) {
-				return s;
-			}
-			
 			return s + " nop";
 		};
-
-		List<String> filteredCode = rawAssembly.stream().map(convertTarget).filter(ignoreLine::test).collect(Collectors.toList());
 		
-		for(int i = 0; i < filteredCode.size(); i++) {
-			String line = filteredCode.get(i);
-			if(line.contains(":")) {
-				String[] splitLine = line.split(":\\s+");
-				String command = splitLine[1];
-				String target = splitLine[0];
-				
-				filteredCode.set(i, command);
-				targets.put(target, i);
-			}
-		}
-		
-		return filteredCode;
-		
-	}
-
-	private List<String> parseCode(List<String> filteredCode) {
-		
-		Function<String, String> targetReplacer = s -> {
-				if (!s.matches("\\d+[a-zA-z]+")) {
-					return s;
-				}
-				
-				
-				String encoding = s.replaceAll("[a-zA-Z]", "");
-				int address = targets.get(s.replaceAll("\\d", ""));
-				
-				return encoding + Parser.toBinary(address, 27);
-		};
-	
-		return filteredCode.parallelStream().map(Parser::parseLine).map(targetReplacer).collect(Collectors.toList());
-	}
-
-	private void printCode(List<String> filteredCode, List<String> parsedCode) {
-		Map<Integer, String> reverseTargets = new HashMap<>();
-		targets.forEach((s, i) -> reverseTargets.put(i, s));
-
-		String n = System.lineSeparator();
-		System.out.printf(DEPTH_FORMAT + n, DEPTH);
-		System.out.printf(WIDTH_FORMAT + n, WIDTH);
-		System.out.println();
-
-		System.out.println(ADDR_RADIX);
-		System.out.println(DATA_RADIX);
-		System.out.println();
-
-		System.out.println("CONTENT");
-		System.out.println("BEGIN");
+		List<String> filteredCode = rawAssembly.stream().map(addNopToEmptyTargetLines)
+														.filter(EmptyAndCommentOnlyLines)
+														.collect(Collectors.toList());
 
 		for (int i = 0; i < filteredCode.size(); i++) {
+			String line = filteredCode.get(i);
+			if (line.contains(":")) {
+				String[] splitLine 	= line.split(":\\s+"); // Split by colon and spaces
+				String command 		= splitLine[1];
+				String target 		= splitLine[0];
 
+				// trim target tag from command
+				// store address of target tag
+				filteredCode.set(i, command);
+				_JumpTargets.put(target, i);
+			}
+		}
+
+		return filteredCode;
+	}
+
+	/**
+	 * Takes filtered code and converts it to assembly, as well as 
+	 * replaces branch targets with address lines.
+	 * 
+	 * @param filteredCode
+	 * @return parsed code
+	 */
+	private List<String> parseCode(List<String> filteredCode) {
+		Function<String, String> targetReplacer = s -> {
+			if (!s.matches("\\d+[a-zA-z]+")) {
+				return s;
+			}
+			String encoding = s.replaceAll("[a-zA-Z]", "");
+			int address = _JumpTargets.get(s.replaceAll("\\d", ""));
+			return encoding + Parser.toBinary(NOP_PAD*address, 27);
+		};
+
+		return filteredCode.parallelStream().map(Parser::parseLine)
+											.map(targetReplacer)
+											.collect(Collectors.toList());
+	}
+
+	/**
+	 * @param filteredCode
+	 * @param parsedCode
+	 */
+	private void printCode(PrintStream ps, List<String> filteredCode, List<String> parsedCode) {
+		Map<Integer, String> reverseTargets = new HashMap<>();
+		_JumpTargets.forEach((s, i) -> reverseTargets.put(i, s));
+
+		// Print Header
+		String n = System.lineSeparator();
+		ps.printf(DEPTH_FORMAT + n, DEPTH);
+		ps.printf(WIDTH_FORMAT + n, WIDTH);
+		ps.println();
+
+		ps.println(ADDR_RADIX);
+		ps.println(DATA_RADIX);
+		ps.println();
+
+		// Print Content
+		ps.println("CONTENT");
+		ps.println("BEGIN");
+
+		for (int i = 0; i < filteredCode.size(); i++) {
 			String rawLine = filteredCode.get(i);
 
 			if (!reverseTargets.containsKey(i)) {
-				System.out.printf("%" + 4 + "s-- %s\n", "", rawLine);
+				ps.printf("%4s-- %s%s", "", rawLine, n);
 			} else {
 				String target = reverseTargets.get(i);
-				System.out.printf("%" + 4 + "s-- %s: %s\n", "", target, rawLine);
+				ps.printf("%4s-- %s: %s%s", "", target, rawLine, n);
 			}
 
-			System.out.printf("%4d : %s;\n", i, parsedCode.get(i));
+			int address = NOP_PAD*i;
+			String instrCode = parsedCode.get(i);
+			ps.printf("%04d : %s;%s", address, instrCode, n);
 		}
-
-		System.out.println("END;");
+		
+		ps.printf("[%d..%d] : %032d;%s", filteredCode.size(), 307200, 0, n);
+		ps.println("END;");
 	}
 
 	public static void main(String[] args) {
 		Assembulator a = new Assembulator();
-		a.run();
+		a.writeTo(System.out);
 	}
 
 }

@@ -1,12 +1,16 @@
-# you can do comments like this
+# Enter Code into this document you can do comments like this
 
-begin: nop
-addi $r1, $r0, 10
-addi $r2, $r0, 25
+begin:  
+addi 	$r1, $r0, 10
+addi 	$r2, $r0, 25
 
 # store 25 at address 10+3 = 13
-wow: sw   $r2, 3($r1)
+wow: 
+lit:
+sw   $r2, 3($r1)
 
+j wow 	# comment after line
+	
 # load address 13, should put 25 in $r9
 addi $r4, $r0, 11
 sub  $r7, $r2, $r4
@@ -15,4 +19,4 @@ lw   $r9, -1($r7)
 # $r10 = 35
 add $r10, $r9, $r1
 
-j wow
+j begin

@@ -113,6 +113,8 @@ public class Parser {
 			return "BAD IMMEDIATE";
 		}
 		
+		
+		
 		return toBinary(value, 17);
 	}
 	
@@ -135,36 +137,20 @@ public class Parser {
 		
 		// Get opcode
 		String opcode = instr.getOpcode();
-		
-		// Get rd
-		int rdNum = Parser.parseRegister(rdArg);
-		String rdCode = Parser.toBinary(rdNum, 5);
-		
-		// Get rs
-		int rsNum = Parser.parseRegister(arg0);
-		String rsCode = Parser.toBinary(rsNum, 5);
-		
-		// Get rt and shamt
-		boolean shiftInstr = instr == Instruction.SRA 
-				|| instr == Instruction.SLL 
-				|| instr == Instruction.SRL;
+		String rdCode = toBinary(parseRegister(rdArg), 5);
+		String rsCode = toBinary(parseRegister(arg0), 5);
 		String rtCode = "00000";
 		String shamt  = "00000";
-		if (!shiftInstr) {
-			int rtNum = Parser.parseRegister(arg1);
-			rtCode = Parser.toBinary(rtNum, 5);
-		} else {
-			int shamtNum = Parser.parseShamt(arg1);
-			shamt = Parser.toBinary(shamtNum, 5);
-		}
-		
-		// Get alu opcode
 		String aluCode = instr.getALUopcode();
 		
-		// Concatenate all codes
-		String instructionCode = opcode + rdCode + rsCode + rtCode + shamt + aluCode + "00";
+		boolean shiftInstr = instr == Instruction.SRA || instr == Instruction.SLL || instr == Instruction.SRL;
+		if (!shiftInstr) {
+			rtCode = toBinary(parseRegister(arg1), 5);
+		} else {
+			shamt = toBinary(parseShamt(arg1), 5);
+		}
 		
-		return instructionCode;
+		return opcode + rdCode + rsCode + rtCode + shamt + aluCode + "00";
 	}
 
 	/**
