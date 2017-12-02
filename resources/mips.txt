@@ -7,6 +7,8 @@ addi 	$r2, $r0, 25
 # store 25 at address 10+3 = 13
 wow: 
 lit:
+nop
+
 sw   $r2, 3($r1)
 
 j wow 	# comment after line

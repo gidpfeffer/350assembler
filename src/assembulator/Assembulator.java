@@ -73,7 +73,7 @@ public class Assembulator implements Assembler{
 		Predicate<String> EmptyAndCommentOnlyLines = s -> {
 			// Ignore comments and then split by comma/spaces
 			String[] split = s.split("\\#")[0].split("[,\\s]+");
-			boolean atLeastOneCommand = split.length > 1 && !split[0].isEmpty();
+			boolean atLeastOneCommand = split.length > 0 && !split[0].isEmpty();
 			return atLeastOneCommand;
 		};
 
@@ -120,10 +120,10 @@ public class Assembulator implements Assembler{
 	 */
 	private List<String> parseCode(List<String> filteredCode) {
 		Function<String, String> targetReplacer = s -> {
-			if (!s.matches("\\d+[a-zA-z]+")) {
+			if (!s.matches("\\d+[a-zA-z_-]+")) {
 				return s;
 			}
-			String encoding = s.replaceAll("[a-zA-Z]", "");
+			String encoding = s.replaceAll("[a-zA-Z_-]", "");
 			int address = _JumpTargets.get(s.replaceAll("\\d", ""));
 			return encoding + Parser.toBinary(NOP_PAD*address, 27);
 		};
@@ -180,7 +180,7 @@ public class Assembulator implements Assembler{
 			ps.printf("%04d : %s;%s", address, instrCode, n);
 		}
 		
-		ps.printf("[%d..%d] : %032d;%s", filtCode.size(), 307200, 0, n);
+		ps.printf("[%d..%d] : %032d;%s", filtCode.size(), 4096, 0, n);
 		ps.println("END;");
 	}
 }
