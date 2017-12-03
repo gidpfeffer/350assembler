@@ -71,20 +71,20 @@ j       writeLoop               # else continue
 addi    $1,     $0,     0       # i = 0
 
 readLoop:
-sw      $3,     0($1)           # $2 = vmem(i)
+lw      $3,     0($1)           # $2 = vmem(i)
 beq     $3,     $1,     1       # if (vmem(i) == i) continue
 j       memoryFail:
 addi    $1,     $1,     1       # i++
 beq     $1,     $2,     1       # if limit == i break
 j       writeLoop               # else continue
 
+noop
 wli                     P
 noop
 j       memoryEnd
 
 memoryFail:
 wli                     F       # Fail
-
 
 memoryEnd:
 
@@ -103,7 +103,6 @@ j       jaltestend
 
 jaltestfail:
 wli                     F
-j       jaltestend
 
 jaltestend:
 
