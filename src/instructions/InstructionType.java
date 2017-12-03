@@ -5,7 +5,8 @@ public enum InstructionType {
 	I,
 	JI,
 	JII,
-	NOP;
+	NOOP, 
+	L;
 	
 	public static InstructionType getByName(String name) {
 		for (InstructionType it : InstructionType.values()) {
@@ -14,6 +15,6 @@ public enum InstructionType {
 			}
 		}
 		
-		return R;
+		return NOOP;
 	}
 }

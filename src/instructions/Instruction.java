@@ -29,7 +29,10 @@ public enum Instruction {
 	SETX	(InstructionType.JI,	"10101"),
 	// VGA (I)
 	SV		(InstructionType.I, 	"01010"),
-	NOP		(InstructionType.NOP,	"00000");
+	LP		(InstructionType.I,		"01011"),
+	NOOP	(InstructionType.NOOP,	"00000"),
+	// LCD (L)
+	WLI     (InstructionType.L, 		"01111");
 
 	private String opcode;
 	public InstructionType type;
@@ -64,7 +67,7 @@ public enum Instruction {
 		}
 		
 		// If not found return no-op
-		return NOP;
+		return NOOP;
 	}
 	
 	/**

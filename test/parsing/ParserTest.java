@@ -42,10 +42,7 @@ class ParserTest {
 	void testParseJIIType() {
 		String[] jr = new String[] {"jr", "$r20"};
 		String jrCode = "00100" + "10100" + "000000" + "00000000" + "00000000";
-		Assertions.assertEquals(jrCode, Parser.parseJIIType(jr, Instruction.JR));
-		
-		
-		
+		Assertions.assertEquals(jrCode, Parser.parseJIIType(jr, Instruction.JR));		
 	}
 	
 	@Test
@@ -73,6 +70,10 @@ class ParserTest {
 		String[] lw = new String[] {"lw", "$1", "-1($7)"};
 		String lwCode = "01000" + "00001" + "00111" + "11111111111111111";
 		Assertions.assertEquals(lwCode, Parser.parseIType(lw, Instruction.LW));
+		
+		String[] lp = new String[] {"lp", "$1", "0($1)"};
+		String lpCode = "01011" + "00001" + "00001" + "00000000000000000";
+		Assertions.assertEquals(lpCode, Parser.parseIType(lp, Instruction.LP));
 	}
 	
 	@Test

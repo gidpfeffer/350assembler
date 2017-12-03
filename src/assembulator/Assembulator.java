@@ -180,7 +180,7 @@ public class Assembulator implements Assembler{
 			ps.printf("%04d : %s;%s", address, instrCode, n);
 		}
 		
-		ps.printf("[%d..%d] : %032d;%s", filtCode.size(), 4096, 0, n);
+		ps.printf("[%04d .. %4d] : %032d;%s", filtCode.size(), DEPTH-1, 0, n);
 		ps.println("END;");
 	}
 }

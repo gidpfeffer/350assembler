@@ -1,5 +1,12 @@
 package main;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.util.Scanner;
+
 import assembulator.Assembler;
 import assembulator.Assembulator;
 
@@ -10,7 +17,19 @@ import assembulator.Assembulator;
  */
 public final class Main {
 	public static void main(String[] args) {
-		Assembler a = new Assembulator("./resources/mips.txt");
+		String filename;
+		
+		if (args.length == 0) {
+			Scanner read = new Scanner(System.in);
+			System.out.print("Please type the filename: ");
+			filename = read.nextLine();
+			read.close();
+		} else {
+			filename = args[0];
+		}
+		
+		
+		Assembler a = new Assembulator(filename);
 		a.writeTo(System.out);
 	}
 }

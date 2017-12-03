@@ -27,15 +27,40 @@ public class Parser {
 		case I: 	return parseIType(split_line, instr);
 		case JI: 	return parseJIType(split_line, instr);
 		case JII: 	return parseJIIType(split_line, instr);
-		case NOP: 	return toBinary(0, 32);
+		case L:		return parseLType(split_line, instr);
+		case NOOP: 	return toBinary(0, 32);
 		default: 	return "";
 		}
 		
 	}
 	
-	public boolean ignoreLine(String line) {
+	
+	static String parseLType(String[] splitLine, Instruction instr) {
+		if(instr == Instruction.WLI) {
+			if (splitLine.length != 2) {
+				return "BAD L: " + instr.name();
+			}
+			
+			String opcode = instr.getOpcode();
+			String filler = toBinary(0, 19);
+			int ascii = 0;
+			try {
+				ascii = Integer.valueOf(splitLine[1]);
+			} catch (NumberFormatException nfe) {
+				if	(splitLine[1].length() == 1) {
+					char ch = splitLine[1].charAt(0);
+					ascii = ch;
+				} else {
+					return "BAD L: ascii " + nfe.getClass().getName();
+				}
+			}
+			
+			String asciiCode = toBinary(ascii, 8);
+			
+			return opcode + filler + asciiCode;
+		}
 		
-		return false;
+		return "BAD L: Not Supported";
 	}
 	
 	static String parseJIIType(String[] splitLine, Instruction instr) {
@@ -75,7 +100,8 @@ public class Parser {
 		boolean memInstr = 
 				   instr == Instruction.LW 
 				|| instr == Instruction.SW 
-				|| instr == Instruction.SV;
+				|| instr == Instruction.SV
+				|| instr == Instruction.LP;
 
 		if (memInstr && splitLine.length != 3 
 		|| !memInstr && splitLine.length != 4) {
