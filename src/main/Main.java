@@ -1,5 +1,8 @@
 package main;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.util.Scanner;
 
 import assembulator.Assembler;
@@ -23,8 +26,15 @@ public final class Main {
 			filename = args[0];
 		}
 		
-		
-		Assembler a = new Assembulator(filename);
-		a.writeTo(System.out);
+		try {
+			String output = "C:\\Users\\George Bernard\\Desktop\\350\\final-project-casino\\labskeleton\\imem.mif";
+			FileOutputStream fos = new FileOutputStream(new File(output));
+			Assembler a = new Assembulator(filename);
+			a.writeTo(fos);
+			a.writeTo(System.out);
+		} catch (FileNotFoundException e) {
+			System.err.println("output file not found");
+		} 
+
 	}
 }
