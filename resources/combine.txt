@@ -153,13 +153,13 @@ addi $1, 	$0, 	0
 jal DrawBackground
 jal executeButton
 bne $3 $7 1
-j slots
+j StartSlots
 nop
-
 
 
 j SelectGameLoop
 
+end:
 END: j END
 
 waitInput: noop				# wait for user input
@@ -745,26 +745,10 @@ nop
 j clearScreen
 
 
-end:
-j end
-#-------------------------------------- BLACKJACK END------------------------#
+j END
+#------------------------------- BLACKJACK END --------------------------------#
 
-#---------------------------------SLOTS -----------------------------------#
 #--------------------------------- Slots Game ---------------------------------#
-slots:
-pollS:
-wp $25
-nop
-nop
-and $6 $25 $4
-nop
-nop
-nop
-nop
-beq $4 $6 1 # aka down
-j StartSlots
-j pollS
-
 StartSlots: noop				# slots 
 
 #------------ Setup screen ------------#
@@ -811,6 +795,9 @@ addi 	$21, 	$0, 	0		# event_enum = 0
 SlotsPrintLoop:
 # Iterate over colors
 lrs 	$20, 	$0, 	0
+noop
+noop
+noop
 add 	$10, 	$10, 	$20		# color += lfsr.read();
 addi 	$3, 	$0, 	3 		# bitmask3 = 3
 noop
@@ -850,10 +837,9 @@ jal DrawBlockFunction
 addi 	$23, 	$0, 	10000
 jal 	Sleep
 
-wli 					A
-bne 	$17, 	$0, 	1 		# if start3 set, then end loop
-j 		EndSlotsPrintLoop		
-wli 					B
+beq 	$17, 	$0, 	1 		# if start3 set, then end loop
+j 		EndSlotsPrintLoop
+noop 		
 
 addi 	$3, 	$0, 	3 		# bitmask3 = 3
 and 	$4, 	$3, 	$10 	# last_two_bits = bitmask3 & color
@@ -872,29 +858,34 @@ noop
 noop
 noop
 addi 	$20, 	$0, 	24
-bne 	$20, 	$19, 	19 		# if (rem == 24)
+bne 	$20, 	$19, 	23 		# if (rem == 24)
 addi 	$21, 	$21, 	1 		# event++
-
+noop 							#--------------------------#
 addi 	$20, 	$0, 	1 	
 noop
 noop
 noop
 bne 	$20, 	$21, 	1		# if (event == 1)
 add 	$15, 	$4,		$0 		# then stop1 = color
-
+noop 							# -------------------------#
 addi 	$20, 	$0, 	2
 noop
 noop
 noop
 bne 	$20, 	$21, 	1 		# if (event == 2)
 add 	$16, 	$4, 	$0 		# then stop2 = color
-
+noop 							#--------------------------#
 addi 	$20, 	$0, 	3
 noop
 noop
 noop
 bne		$20, 	$21, 	1 		# if (event == 3)
 add 	$17, 	$4, 	$0 		# then stop3 = color
+noop 							#--- end if (rem == 24) ---#
+noop							# Noop sled
+noop
+noop
+noop
 
 j 	SlotsPrintLoop 				# continue loop
 
@@ -905,27 +896,61 @@ lw 		$2, 	1001($0)
 lw 		$3, 	1002($0)
 
 #---------- Calculate score -----------#
-#wli 					0
-add 	$22,	$15, 	$0
-jal 	printNumber
-add 	$22,	$16, 	$0
-jal 	printNumber
-add 	$22,	$17, 	$0
-jal		printNumber
+wli 					0
+#add 	$22,	$15, 	$0
+#jal 	printNumber
+#add 	$22,	$16, 	$0
+#jal 	printNumber
+#add 	$22,	$17, 	$0
+#jal		printNumber
 
 addi 	$20, 	$0, 	0		# Score = 0
+noop 							# initialize the score
+noop
+noop
 bne 	$15, 	$16, 	1 		# if first == second
-addi 	$20, 	$0, 	2		# score += 2
+addi 	$20, 	$20, 	2		# score += 2
+noop
+noop
+noop
 bne 	$16,	$17, 	1 		# if second == third
-addi 	$20, 	$0, 	2 		# score += 2
+addi 	$20, 	$20, 	2 		# score += 2
+
+wli 					S
+wli 					c
+wli 					o
+wli 					r
+wli 					e
+wli 					58
 
 addi 	$22, 	$20, 	0		
 jal 	printNumber
+nooop
+wli 					!
+
+wli 					32
+wli 					32
+wli 					32
+wli 					32
+wli 					32
+wli 					32
+wli 					32
+wli 					32
+
+addi 	$21,  	$0, 	4
+bne 	$20, 	$21, 	9
+noop
+wli 					J
+wli 					A 
+wli 					C
+wli 					K
+wli 					P
+wli 					O
+wli 					T
+wli 					!
 
 #------------ Print Score -------------#
-
-
-waitInputA: noop            	# wait for user input
+waitInputSlots: noop            # wait for user input
 wp   	$25                    	# update(input)
 addi 	$26, 	$0, 	1 		# zeroeth bitmask
 noop
@@ -935,15 +960,15 @@ noop
 noop
 noop
 bne  	$24,   $27,     1       # if (input != old_input) break
-j waitInputA             		# else continue loop
+j waitInputSlots             	# else continue loop
 add  	$24,   $27,     $0      # old_input = new_input
 
 addi 	$1, 	$1, 	1
 beq 	$1, 	$2 		1 		# if (i == roundLimit) break
 j 	SlotsGameLoop 				# else continue loop
 
-END: j END
-
+j END
+#--------------------------------- End Slots ----------------------------------#
 
 #------------------------------- Draw Function --------------------------------#
 DrawTechnicolor: noop			# args  $3 - w | $4 - h | $5 - x | $6 - y | $10 - color
@@ -985,39 +1010,6 @@ j drawTechnicolorLoopJ 			# else continue loop
 
 jr $31
 
-
-#--------- Calc start address ---------#
-
-mult 	$7, 	$6, 	$1 		# start = (img_y * scr_w) + img_x
-mult 	$7, 	$6, 	$1
-mult 	$7, 	$6, 	$1
-mult 	$7, 	$6, 	$1
-add  	$7, 	$7, 	$5
-add 	$11, 	$7, 	$0 		# address = start
-
-#------------- Draw Image -------------#
-
-addi 	$9, 	$0, 	0		# j = 0
-drawBlockLoopJ:
-
-addi 	$8, 	$0, 	0		# i = 0
-drawBlockLoopI:
-sv 		$10, 	0($11) 			# vmem(start) = 3
-addi 	$11, 	$11, 	1 		# addr++
-addi 	$8, 	$8, 	1 		# i++
-
-beq 	$8, 	$3, 	1 		# if i != img_w break
-j drawBlockLoopI				# else continue loop
-
-add 	$7, 	$7, 	$1 		# start += scr_w
-add 	$11, 	$7, 	$0  	# addr = start
-addi 	$9, 	$9, 	1 		# j++
-
-beq 	$9, 	$4, 	1 		# if j != img_h break
-j drawBlockLoopJ 				# else continue loop
-
-jr $31
-
 #------------------------------- Sleep Function -------------------------------#
 
 Sleep: noop                     # args: $23
@@ -1035,10 +1027,7 @@ j   sleepLoop
 
 jr $31
 
-
-#-------------------------------SLOTS END ---------------------------
-
-#-------------------------------------CHO HAN --------------------------------#
+#------------------------------------- CHO HAN --------------------------------#
 chohan:
 
 pollCH:
@@ -1336,7 +1325,7 @@ bne  $11,   $7,     1       # if (input != old_input) break
 j    waitInputF             # else continue loop
 add  $7,    $11,    $0      # old_input = new_input
 
-END: j END                  # end program
+j END                  		# end program
 
 
 #-------------------------------- Print ChoHan --------------------------------#
@@ -1574,7 +1563,7 @@ j drawLoopJ 					# else continue loop
 
 jr $31
 
-Draw Function --------------------------------#
+#------------------------------- Draw Function --------------------------------#
 DrawBlockFunction: noop			# args  $3 - w | $4 - h | $5 - x | $6 - y | $10 - color
 								# uses  $1, $2, $7, $8, $9, $10, $11
 
@@ -1613,21 +1602,6 @@ j drawBlockLoopJ 				# else continue loop
 
 jr $31
 
-
-
-
-#------------------------- waitForUserToggle Function -------------------------#
-#waitForUserToggle: noop 	# args = <24> use = <25>
-#waitInput: noop				# wait for user input
-#wp 	 $25					# update(input)
-#noop
-#noop
-#noop
-#noop
-#bne  $25,   $24,     1      # if (input != old_input) break
-#j    waitInput              # else continue loop
-#add  $24,   $25,    $0      # old_input = new_input
-#jr 	 $31
 
 #--------------------------------- Menu items ---------------------------------#
 printChoHan:
