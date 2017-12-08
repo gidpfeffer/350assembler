@@ -45,6 +45,9 @@ addi 	$21, 	$0, 	0		# event_enum = 0
 SlotsPrintLoop:
 # Iterate over colors
 lrs 	$20, 	$0, 	0
+noop
+noop
+noop
 add 	$10, 	$10, 	$20		# color += lfsr.read();
 addi 	$3, 	$0, 	3 		# bitmask3 = 3
 noop
@@ -84,10 +87,9 @@ jal DrawBlockFunction
 addi 	$23, 	$0, 	10000
 jal 	Sleep
 
-wli 					A
-bne 	$17, 	$0, 	1 		# if start3 set, then end loop
-j 		EndSlotsPrintLoop		
-wli 					B
+beq 	$17, 	$0, 	1 		# if start3 set, then end loop
+j 		EndSlotsPrintLoop
+noop 		
 
 addi 	$3, 	$0, 	3 		# bitmask3 = 3
 and 	$4, 	$3, 	$10 	# last_two_bits = bitmask3 & color
@@ -106,29 +108,34 @@ noop
 noop
 noop
 addi 	$20, 	$0, 	24
-bne 	$20, 	$19, 	19 		# if (rem == 24)
+bne 	$20, 	$19, 	23 		# if (rem == 24)
 addi 	$21, 	$21, 	1 		# event++
-
+noop 							#--------------------------#
 addi 	$20, 	$0, 	1 	
 noop
 noop
 noop
 bne 	$20, 	$21, 	1		# if (event == 1)
 add 	$15, 	$4,		$0 		# then stop1 = color
-
+noop 							# -------------------------#
 addi 	$20, 	$0, 	2
 noop
 noop
 noop
 bne 	$20, 	$21, 	1 		# if (event == 2)
 add 	$16, 	$4, 	$0 		# then stop2 = color
-
+noop 							#--------------------------#
 addi 	$20, 	$0, 	3
 noop
 noop
 noop
 bne		$20, 	$21, 	1 		# if (event == 3)
 add 	$17, 	$4, 	$0 		# then stop3 = color
+noop 							#--- end if (rem == 24) ---#
+noop							# Noop sled
+noop
+noop
+noop
 
 j 	SlotsPrintLoop 				# continue loop
 
@@ -139,22 +146,58 @@ lw 		$2, 	1001($0)
 lw 		$3, 	1002($0)
 
 #---------- Calculate score -----------#
-#wli 					0
-add 	$22,	$15, 	$0
-jal 	printNumber
-add 	$22,	$16, 	$0
-jal 	printNumber
-add 	$22,	$17, 	$0
-jal		printNumber
+wli 					0
+#add 	$22,	$15, 	$0
+#jal 	printNumber
+#add 	$22,	$16, 	$0
+#jal 	printNumber
+#add 	$22,	$17, 	$0
+#jal		printNumber
 
 addi 	$20, 	$0, 	0		# Score = 0
+noop 							# initialize the score
+noop
+noop
 bne 	$15, 	$16, 	1 		# if first == second
-addi 	$20, 	$0, 	2		# score += 2
+addi 	$20, 	$20, 	2		# score += 2
+noop
+noop
+noop
 bne 	$16,	$17, 	1 		# if second == third
-addi 	$20, 	$0, 	2 		# score += 2
+addi 	$20, 	$20, 	2 		# score += 2
+
+wli 					S
+wli 					c
+wli 					o
+wli 					r
+wli 					e
+wli 					58
 
 addi 	$22, 	$20, 	0		
 jal 	printNumber
+nooop
+wli 					!
+
+wli 					32
+wli 					32
+wli 					32
+wli 					32
+wli 					32
+wli 					32
+wli 					32
+wli 					32
+
+addi 	$21,  	$0, 	4
+bne 	$20, 	$21, 	9
+noop
+wli 					J
+wli 					A 
+wli 					C
+wli 					K
+wli 					P
+wli 					O
+wli 					T
+wli 					!
 
 #------------ Print Score -------------#
 
