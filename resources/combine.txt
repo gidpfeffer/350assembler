@@ -1043,7 +1043,7 @@ nop
 nop
 nop
 nop
-bne $3 $6 1 # aka up
+beq $25 $0 1 # aka up
 j greenWarInit
 j pollCWarInit
 
