@@ -1,128 +1,70 @@
-### (Almost) All Instruction Test
+DEPTH = 4096;
+WIDTH = 32;
 
-#------------------------------ Arithmetic Tests ------------------------------#
+ADDRESS_RADIX = DEC;
+DATA_RADIX = BIN;
 
-noop # addi test
-addi    $1,    $0,      48       # $1 = 48
-addi    $2,    $1,      37       # $2 = $1 + 37
-addi    $3,    $0,      85       # $3 = 85
-
-beq     $1,    $3,      3        # Pass (48 + 37 = 85)
-noop
-wli                     P
-j   testaddi  
-
-noop
-wli                     F
-
-testaddi:
-
-noop # sub test   
-sub     $4,    $3,      $1      # $4 = $3 - $1
-
-beq     $4,    $0,      3       # Pass (85 - 85 = 0)
-noop 
-wli                     P
-j testsub
-
-noop
-wli                     F
-
-testsub: 
-
-noop # add and sll test   
-add     $5,    $3,      $3      # $5 = $3 + $3
-sll     $6,    $3,      1       # $6 = 3 << 1
-
-beq     $4,    $0,      3       # Pass (85 - 85 = 0)
-noop 
-wli                     P
-j testaddsll
-
-noop
-wli                     F
-
-testaddsll: 
-
-noop # and test
-and     $7,     $6,     $0      # $7 = $6 & $0   
-
-beq     $4,     $0,      3      # Pass (85 - 85 = 0)
-noop 
-wli                     P
-j testand
-
-noop
-wli                     F
-
-testand:
-
-#--------------------------- Jump and branch tests ----------------------------# 
-
-jal     jaltestfunction
-j       jaltestpass
-
-jaltestfunction:
-jr      $31
-j       jaltestfail
-
-jaltestpass:
-wli                     P
-j       jaltestend
-
-jaltestfail:
-wli                     F
-j       jaltestend
-
-jaltestend:
-
-#----------------------------------- Memory -----------------------------------#
-
-addi    $1,     $0,     0       # i = 0
-addi    $2,     $0,     5     	# limit = 500
-
-writeLoop:
-sw      $1,     0($1)           # vmem(i) = i
-addi    $1,     $1,     1       # i++
-beq     $1,     $2,     1       # if limit == i break
-j       writeLoop               # else continue
-
-addi    $1,     $0,     0       # i = 0
-
-readLoop:
-lw      $3,     0($1)           # $2 = vmem(i)
-beq     $3,     $1,     1       # if (vmem(i) == i) continue
-j       memoryFail				# else break				
-addi    $1,     $1,     1       # i++
-beq     $1,     $2,     1       # if (limit == i) break
-j       readLoop                # else continue
-
-noop
-wli                     P
-j       memoryEnd
-
-memoryFail:
-wli                     F       # Fail
-
-memoryEnd:
-
-#--------------------------- Jump and branch tests ----------------------------# 
-
-jal     jaltestfunction
-j       jaltestpass
-
-jaltestfunction:
-jr      $31
-j       jaltestfail
-
-jaltestpass:
-wli                     P
-j       jaltestend
-
-jaltestfail:
-wli                     F
-
-jaltestend:
-
-
-END: j END
+CONTENT
+BEGIN
+    -- noop 							# Draw arbitrary
+0000 : 00000000000000000000000000000000;
+    -- addi	$1,		$0, 	640 	# scr_w = 640
+0001 : 00101000010000000000001010000000;
+    -- addi 	$2, 	$0, 	480 	# scr_h = 480
+0002 : 00101000100000000000000111100000;
+    -- addi 	$3, 	$0, 	50		# img_w = 200
+0003 : 00101000110000000000000000110010;
+    -- addi	$4, 	$0, 	50 		# img_h = 200
+0004 : 00101001000000000000000000110010;
+    -- addi	$5, 	$0,		295		# img_x = 100
+0005 : 00101001010000000000000100100111;
+    -- addi 	$6, 	$0, 	215 	# img_y = 100
+0006 : 00101001100000000000000011010111;
+    -- addi 	$10, 	$0, 	3		# color = 3;
+0007 : 00101010100000000000000000000011;
+    -- mult 	$7, 	$6, 	$1 		# start = (img_y * scr_w) + img_x
+0008 : 00000001110011000001000000100100;
+    -- mult 	$7, 	$6, 	$1
+0009 : 00000001110011000001000000100100;
+    -- mult 	$7, 	$6, 	$1
+0010 : 00000001110011000001000000100100;
+    -- mult 	$7, 	$6, 	$1
+0011 : 00000001110011000001000000100100;
+    -- add  	$7, 	$7, 	$5
+0012 : 00000001110011100101000000000000;
+    -- add 	$11, 	$7, 	$0 		# address = start
+0013 : 00000010110011100000000000000000;
+    -- addi 	$9, 	$0, 	0		# j = 0
+0014 : 00101010010000000000000000000000;
+    -- drawLoopJ: nop
+0015 : 00000000000000000000000000000000;
+    -- addi 	$8, 	$0, 	0		# i = 0
+0016 : 00101010000000000000000000000000;
+    -- drawLoopI: nop
+0017 : 00000000000000000000000000000000;
+    -- sv 		$10, 	0($11) 			# vmem(start) = 3
+0018 : 01010010100101100000000000000000;
+    -- addi 	$11, 	$11, 	1 		# addr++
+0019 : 00101010110101100000000000000001;
+    -- addi 	$10, 	$10, 	1 		# color++
+0020 : 00101010100101000000000000000001;
+    -- addi 	$8, 	$8, 	1 		# i++
+0021 : 00101010000100000000000000000001;
+    -- beq 	$8, 	$3, 	1 		# if i != img_w break
+0022 : 01001010000001100000000000000001;
+    -- j drawLoopI 					# else continue loop
+0023 : 00001000000000000000000000010001;
+    -- add 	$7, 	$7, 	$1 		# start += scr_w
+0024 : 00000001110011100001000000000000;
+    -- add 	$11, 	$7, 	$0  	# addr = start
+0025 : 00000010110011100000000000000000;
+    -- addi 	$9, 	$9, 	1 		# j++
+0026 : 00101010010100100000000000000001;
+    -- beq 	$9, 	$4, 	1 		# if j != img_h break
+0027 : 01001010010010000000000000000001;
+    -- j drawLoopJ 					# else continue loop
+0028 : 00001000000000000000000000001111;
+    -- END: j END
+0029 : 00001000000000000000000000011101;
+[0030 .. 4095] : 00000000000000000000000000000000;
+END;

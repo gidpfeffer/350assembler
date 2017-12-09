@@ -1,17 +1,23 @@
 noop                        # beq-test
 
 addi $1,    $0,     3       # x = 3
+addi $2, 	$0, 	3
+noop
+noop
+noop
 
-beq  $1,    $1,     3
+beq  $1,    $2,     3
 noop
 wli                 B 
 wli                 C
 wli                 D
 wli                 E
 wli                 F
-wli                 12
+wli                 32
+noop
+wli                 B
 
-bne $1,     $1,     3
+bne $1,     $2,     3
 noop
 wli                 B 
 wli                 C

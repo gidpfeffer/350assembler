@@ -11,6 +11,9 @@ public enum Instruction {
 	MUL		(InstructionType.R,		"00110"),
 	DIV		(InstructionType.R,		"00111"),
 	SRL		(InstructionType.R, 	"01000"),
+	MULT	(InstructionType.R, 	"01001"),
+	DIVI	(InstructionType.R, 	"01010"),
+	REM		(InstructionType.R, 	"01011"),	
 	// Arithmetic (I) 				[opcode]
 	ADDI	(InstructionType.I,		"00101"),
 	// Memory (I)
@@ -33,10 +36,11 @@ public enum Instruction {
 	NOOP	(InstructionType.NOOP,	"00000"),
 	// LCD (L)
 	WLI     (InstructionType.L, 	"01111"),
-	WLR 	(InstructionType.L, 	"10000"),
-	// Random
-	RNST	(InstructionType.I, 	"01101"),
-	RNRD	(InstructionType.I, 	"01110");
+	// LFSR
+	LSS		(InstructionType.I, 	"01100"),
+	LRS		(InstructionType.I, 	"01101"),
+	// User input
+	WP		(InstructionType.L, 	"01110");
 
 	private String opcode;
 	public InstructionType type;
