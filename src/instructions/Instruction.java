@@ -32,7 +32,11 @@ public enum Instruction {
 	LP		(InstructionType.I,		"01011"),
 	NOOP	(InstructionType.NOOP,	"00000"),
 	// LCD (L)
-	WLI     (InstructionType.L, 	"01111");
+	WLI     (InstructionType.L, 	"01111"),
+	WLR 	(InstructionType.L, 	"10000"),
+	// Random
+	RNST	(InstructionType.I, 	"01101"),
+	RNRD	(InstructionType.I, 	"01110");
 
 	private String opcode;
 	public InstructionType type;
