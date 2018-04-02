@@ -31,8 +31,11 @@ public class Assembulator implements Assembler{
 
 	private List<String> _RawAssembly;
 	private Map<String, Integer> _JumpTargets;
+	
+	private String _Filename;
 
 	public Assembulator(String filename) {
+		_Filename = filename.substring(filename.lastIndexOf('/')+1, filename.length());
 		_RawAssembly = new ArrayList<>();
 		_JumpTargets = new HashMap<>();
 
@@ -147,6 +150,8 @@ public class Assembulator implements Assembler{
 	private void writeHeader(PrintStream ps) {
 		// Print Header
 		String n = System.lineSeparator();
+		String FILE_FORMAT = "-- %s";
+		ps.printf(FILE_FORMAT + n, _Filename);
 		ps.printf(DEPTH_FORMAT + n, DEPTH);
 		ps.printf(WIDTH_FORMAT + n, WIDTH);
 		ps.println();

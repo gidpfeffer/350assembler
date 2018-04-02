@@ -59,6 +59,7 @@ public class Parser {
 			
 			return opcode + filler + asciiCode;
 		}
+
 		if (instr == Instruction.WP) {
 			return instr.getOpcode() + toBinary(parseRegister(splitLine[1]), 5) + toBinary(0, 22);
 		}

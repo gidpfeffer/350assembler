@@ -26,15 +26,7 @@ public final class Main {
 			filename = args[0];
 		}
 		
-		try {
-			String output = "C:\\Users\\George Bernard\\Desktop\\350\\final-project-casino\\labskeleton\\imem.mif";
-			FileOutputStream fos = new FileOutputStream(new File(output));
-			Assembler a = new Assembulator(filename);
-			a.writeTo(fos);
-			a.writeTo(System.out);
-		} catch (FileNotFoundException e) {
-			System.err.println("output file not found");
-		} 
-
+		Assembler a = new Assembulator(filename);
+		a.writeTo(System.out);
 	}
 }
