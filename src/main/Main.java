@@ -23,7 +23,6 @@ public final class Main {
 			filename = args[0];
 		}
 		
-		
 		Assembler a = new Assembulator(filename);
 		a.writeTo(System.out);
 	}
