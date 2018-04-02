@@ -59,14 +59,9 @@ public class Parser {
 			
 			return opcode + filler + asciiCode;
 		}
-		if (instr == Instruction.WLR) {
-			if (splitLine.length != 2) {
-				return "BAD WLR";
-			}
-			
-			int regNum = parseRegister(splitLine[1]);
-			
-			return instr.getOpcode() + toBinary(0,5) + toBinary(regNum, 5) + parseImmediate("0");
+
+		if (instr == Instruction.WP) {
+			return instr.getOpcode() + toBinary(parseRegister(splitLine[1]), 5) + toBinary(0, 22);
 		}
 		
 		return "BAD L: Not Supported";
