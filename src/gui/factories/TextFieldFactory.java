@@ -8,9 +8,9 @@ public class TextFieldFactory {
         return getInstance("");
     }
 
-    public static TextField getInstance(String contextText){
+    public static TextField getInstance(String promptText){
         TextField tf = new TextField();
-        tf.setPromptText(contextText);
+        tf.setPromptText(promptText);
         return tf;
     }
 }

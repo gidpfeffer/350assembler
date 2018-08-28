@@ -29,22 +29,25 @@ public class Assembulator implements Assembler{
 
 	private static final int NOP_PAD = 1;
 
-	private List<String> _RawAssembly;
-	private Map<String, Integer> _JumpTargets;
+	private List<String> rawAssembly = new ArrayList<>();
+	private Map<String, Integer> jumpTargets = new HashMap<>();
 	
-	private String _Filename;
+	private String filename;
 
+	public Assembulator(){
+
+    }
+
+	@Deprecated
 	public Assembulator(String filename) {
-		_Filename = filename.substring(filename.lastIndexOf('/')+1, filename.length());
-		_RawAssembly = new ArrayList<>();
-		_JumpTargets = new HashMap<>();
-
+		this.filename = filename.substring(filename.lastIndexOf(File.separator)+1);
 		loadFile(filename);
 	}
 
 	@Override
-	public void writeTo(OutputStream os) {
-		List<String> filteredCode = filterCode(_RawAssembly);
+	public void writeTo(InputStream is, OutputStream os) {
+	    // TODO load is for use
+		List<String> filteredCode = filterCode(rawAssembly);
 		List<String> parsedCode = parseCode(filteredCode);		
 		writeCode(new PrintStream(os), filteredCode, parsedCode);
 	}
@@ -56,7 +59,7 @@ public class Assembulator implements Assembler{
 		try {
 			codeScan = new Scanner(file);
 			while (codeScan.hasNextLine()) {
-				_RawAssembly.add(codeScan.nextLine());
+				rawAssembly.add(codeScan.nextLine());
 			}
 			codeScan.close();
 		} catch (FileNotFoundException e) {
@@ -109,7 +112,7 @@ public class Assembulator implements Assembler{
 				// trim target tag from command
 				// store address of target tag
 				code.set(i, command);
-				_JumpTargets.put(target, i);
+				jumpTargets.put(target, i);
 			}
 		}
 	}
@@ -127,7 +130,7 @@ public class Assembulator implements Assembler{
 				return s;
 			}
 			String encoding = s.replaceAll("[a-zA-Z_-]", "");
-			int address = _JumpTargets.get(s.replaceAll("\\d", ""));
+			int address = jumpTargets.get(s.replaceAll("\\d", ""));
 			return encoding + Parser.toBinary(NOP_PAD*address, 27);
 		};
 
@@ -151,7 +154,7 @@ public class Assembulator implements Assembler{
 		// Print Header
 		String n = System.lineSeparator();
 		String FILE_FORMAT = "-- %s";
-		ps.printf(FILE_FORMAT + n, _Filename);
+		ps.printf(FILE_FORMAT + n, filename);
 		ps.printf(DEPTH_FORMAT + n, DEPTH);
 		ps.printf(WIDTH_FORMAT + n, WIDTH);
 		ps.println();
@@ -168,7 +171,7 @@ public class Assembulator implements Assembler{
 		ps.println("BEGIN");
 		
 		Map<Integer, String> reverseTargets = new HashMap<>();
-		_JumpTargets.forEach((s, i) -> reverseTargets.put(i, s));
+		jumpTargets.forEach((s, i) -> reverseTargets.put(i, s));
 
 		for (int i = 0; i < filtCode.size(); i++) {
 			String rawLine = filtCode.get(i);
