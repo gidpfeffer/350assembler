@@ -34,11 +34,11 @@ public class Assembulator implements Assembler{
 	
 	private String filename;
 
-	public Assembulator(){
+	public Assembulator(){}
 
-    }
-
-	@Deprecated
+    /**
+     *  @Deprecated Each call to writeTo should specify the target to read from.
+    */
 	public Assembulator(String filename) {
 		this.filename = filename.substring(filename.lastIndexOf(File.separator)+1);
 		loadFile(filename);

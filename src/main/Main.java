@@ -24,6 +24,6 @@ public final class Main {
 		}
 		
 		Assembler a = new Assembulator(filename);
-		a.writeTo(System.out);
+		//a.writeTo(System.out);
 	}
 }
