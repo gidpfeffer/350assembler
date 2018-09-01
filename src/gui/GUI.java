@@ -161,6 +161,29 @@ public class GUI implements Executable{
             DialogFactory.showError(e);
         }
     }
+    @Override
+    public void go(){
+        String inString = input.getText();
+        String outString = output.getText();
+        if(inString.isEmpty() || outString.isEmpty()){
+            DialogFactory.showError("Must specify input and output locations.");
+            return;
+        }
+        File in = new File(inString);
+        File out = new File(outString);
+        try {
+            System.out.println("In " + in.getCanonicalPath() + "\nOut " + out.getCanonicalPath());
+            if (in.isDirectory() && out.isDirectory()) {
+                encodeAllFiles(in, out);
+            } else if (!in.isDirectory() && out.isDirectory()) {
+                writeFile(new FileInputStream(in), new FileOutputStream(getOutputFileFromDirectory(out, in.getName())));
+            } else if (!in.isDirectory() && !out.isDirectory()) {
+                writeFile(new FileInputStream(in), new FileOutputStream(out));
+            }
+        } catch(IOException e){
+            DialogFactory.showError(e);
+        }
+    }
 
     private void encodeAllFiles(File in, File out){
         try {
