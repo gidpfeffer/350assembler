@@ -10,6 +10,7 @@ public class MenuListener<T> implements ChangeListener<T> {
     @Override
     public void changed(ObservableValue<? extends T> observable, T oldValue, T newValue) {
         currentState = newValue;
+        System.out.println(newValue);
     }
 
     public void setDefaultState(T state){

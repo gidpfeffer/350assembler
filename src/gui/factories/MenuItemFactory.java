@@ -16,7 +16,7 @@ public class MenuItemFactory {
     public static final String CHECK_MENU = "CheckMenuItem";
     public static final String DEFAULT_MENU = "MenuItem";
 
-    public static MenuItem getInstance(String label, String type, Object actionHandler){
+    public static MenuItem getInstance(String type, String label, Object actionHandler){
         switch (type) {
             case RADIO_MENU:
             case CHECK_MENU:
@@ -31,7 +31,6 @@ public class MenuItemFactory {
             default:
                 throw new IllegalArgumentException("Unrecognized menu item type: " + type);
         }
-
         return null;
     }
 
