@@ -1,5 +1,7 @@
 package assembulator;
 
+import instructions.BadInstructionException;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -11,5 +13,5 @@ public interface Assembler {
      * @param is Stream to read from
 	 * @param os Stream to write to
 	 */
-	public void writeTo(InputStream is, OutputStream os);
+	public void writeTo(InputStream is, OutputStream os) throws BadInstructionException;
 }

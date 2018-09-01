@@ -1,14 +1,14 @@
 package assembulator;
 
-import java.util.*;
-import java.util.Scanner;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
-
+import gui.DialogFactory;
+import instructions.BadInstructionException;
 import parsing.Parser;
 
 import java.io.*;
+import java.util.*;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 /**
  * Simple parser that converts MIPS code into machine code using the ISA
@@ -45,12 +45,26 @@ public class Assembulator implements Assembler{
 	}
 
 	@Override
-	public void writeTo(InputStream is, OutputStream os) {
-	    // TODO load is for use
+	public void writeTo(InputStream is, OutputStream os) throws BadInstructionException{
+        loadFile(is);
 		List<String> filteredCode = filterCode(rawAssembly);
 		List<String> parsedCode = parseCode(filteredCode);		
 		writeCode(new PrintStream(os), filteredCode, parsedCode);
 	}
+
+	private void loadFile(InputStream is){
+	   String line;
+	   BufferedReader r = new BufferedReader(new InputStreamReader(is));
+	   try{
+	       while((line = r.readLine()) != null){
+               rawAssembly.add(line);
+           }
+           r.close();
+       } catch (IOException e){
+           DialogFactory.showError(e);
+       }
+
+    }
 	
 	private void loadFile(String filename) {
 		File file = new File(filename);		
@@ -124,7 +138,7 @@ public class Assembulator implements Assembler{
 	 * @param filteredCode
 	 * @return parsed code
 	 */
-	private List<String> parseCode(List<String> filteredCode) {
+	private List<String> parseCode(List<String> filteredCode) throws BadInstructionException {
 		Function<String, String> targetReplacer = s -> {
 			if (!s.matches("\\d+[a-zA-z_-]+")) {
 				return s;

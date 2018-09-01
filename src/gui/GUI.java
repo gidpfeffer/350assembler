@@ -2,14 +2,17 @@ package gui;
 
 import assembulator.Assembler;
 import assembulator.Assembulator;
-import gui.factories.*;
+import gui.factories.ButtonFactory;
+import gui.factories.MenuBarFactory;
+import gui.factories.MenuItemFactory;
+import gui.factories.TextFieldFactory;
+import instructions.BadInstructionException;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
 import javafx.scene.Group;
 import javafx.scene.Scene;
-import javafx.scene.control.*;
 import javafx.scene.control.Button;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.TextArea;
@@ -19,10 +22,13 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
+import org.jetbrains.annotations.NotNull;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.*;
-import java.util.List;
 
 public class GUI implements Executable{
 
@@ -33,7 +39,7 @@ public class GUI implements Executable{
     private TextField output;
     private MenuBar topBar;
     private List<Button> buttons = new ArrayList<>();
-    private Map<String, ChangeListener<Boolean>> listenerMap = new HashMap<>();
+    private Map<String, MenuListener<Boolean>> listenerMap = new HashMap<>();
     private Group root = new Group();
     private BorderPane bp = new BorderPane();
     private Assembler assembler = new Assembulator();
@@ -111,16 +117,19 @@ public class GUI implements Executable{
                 MenuBarFactory.BREAK,
                 MenuBarFactory.MENU, "Edit",
                     MenuBarFactory.MENU_ITEM, MenuItemFactory.DEFAULT_MENU, "Clear log",
+                    MenuBarFactory.MENU_ITEM, MenuItemFactory.CHECK_MENU, "Clear log before runs",
                 MenuBarFactory.BREAK
         );
-        listenerMap.put("Overwrite", new MenuListener<>());
+        listenerMap.put("overwrite", new MenuListener<>());
         listenerMap.put("all", new MenuListener<>());
         listenerMap.put("none", new MenuListener<>());
         listenerMap.put("subdirs", new MenuListener<>());
         listenerMap.put("outdir", new MenuListener<>());
-        List<ChangeListener<Boolean>> listeners = List.of(listenerMap.get("Overwrite"),
+        listenerMap.put("clcEach", new MenuListener<>());
+        for(MenuListener<Boolean> ml : listenerMap.values()) ml.setDefaultState(false);
+        List<ChangeListener<Boolean>> listeners = List.of(listenerMap.get("overwrite"),
                 listenerMap.get("all"), listenerMap.get("none"),
-                listenerMap.get("subdirs"), listenerMap.get("outdir"));
+                listenerMap.get("subdirs"), listenerMap.get("outdir"), listenerMap.get("clcEach"));
         List<EventHandler<ActionEvent>> handlers = List.of(e->log.clear());
         topBar = MenuBarFactory.getInstance(structure, listeners, handlers);
     }
@@ -141,6 +150,7 @@ public class GUI implements Executable{
     }
     @Override
     public void go(){
+        if(listenerMap.get("clcEach").getCurrentState()) log.clear(); // clear before each run == true
         String inString = input.getText();
         String outString = output.getText();
         if(inString.isEmpty() || outString.isEmpty()){
@@ -148,38 +158,52 @@ public class GUI implements Executable{
             return;
         }
         File in = new File(inString);
-        File out = new File(outString);
+        File out = (listenerMap.get("outdir").getCurrentState()) ? new File(String.join(File.separator, outString, "mif_outputs")) : new File(outString);
+        if(!out.exists()) out.mkdirs();
         try {
-            if (in.isDirectory() && out.isDirectory()) {
+            if (in.isDirectory()) {
                 encodeAllFiles(in, out);
-            } else if (!in.isDirectory() && out.isDirectory()) {
-                writeFile(new FileInputStream(in), new FileOutputStream(getOutputFileFromDirectory(out, in.getName())));
-            } else if (!in.isDirectory() && !out.isDirectory()) {
-                writeFile(new FileInputStream(in), new FileOutputStream(out));
+            } else {
+                writeFile(in, getOutputFileFromDirectory(out, in.getName()));
             }
-        } catch(IOException e){
+        } catch(IOException | BadInstructionException e){
             DialogFactory.showError(e);
+            log.appendText(String.format("!!FAILURE!! -- %s\n", e.getMessage()));
         }
     }
 
-    private void encodeAllFiles(File in, File out){
-        try {
-            for (File file : in.listFiles()) {
+    private void encodeAllFiles(@NotNull File in, File out) throws IOException, BadInstructionException{
+        Collection<File> files = Arrays.asList(in.listFiles());
+        for (File file : files) {
+            if(listenerMap.get("subdirs").getCurrentState() && file.isDirectory()){
+                files.addAll(Arrays.asList(file.listFiles()));
+            } else {
                 String name = file.getName();
                 File outputFile = getOutputFileFromDirectory(out, name);
-                writeFile(new FileInputStream(file), new FileOutputStream(outputFile));
+                writeFile(file, outputFile);
             }
-        }catch(IOException e){
-            DialogFactory.showError(e);
         }
     }
 
     private File getOutputFileFromDirectory(File out, String name) throws IOException {
-        return new File(String.join(File.separator, out.getCanonicalPath(), name));
+        StringBuilder sb = new StringBuilder(name);
+        sb.delete(sb.lastIndexOf("."), sb.length());
+        sb.append(".mif");
+        return new File(String.join(File.separator, out.getCanonicalPath(), sb.toString()));
     }
 
-    private void writeFile(FileInputStream fis, FileOutputStream out){
-        assembler.writeTo(fis, out);
+    private void writeFile(File fin, File fout) throws IOException, BadInstructionException {
+        log.appendText(String.format("Attempting to write %s to %s\n", fin.getName(), fout.getName()));
+        if(fout.exists() && !listenerMap.get("overwrite").getCurrentState()){
+            log.appendText(String.format("File %s already exists. To set overwrite, update menu setting in File->Overwrite Files\n", fout.getName()));
+            return;
+        }
+        FileInputStream fis = new FileInputStream(fin);
+        FileOutputStream fos = new FileOutputStream(fout);
+        assembler.writeTo(fis,fos);
+        fis.close();
+        fos.close();
+        log.appendText("Success\n");
     }
 
 }
