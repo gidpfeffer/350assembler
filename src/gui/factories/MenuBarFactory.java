@@ -24,58 +24,41 @@ public class MenuBarFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static MenuBar getInstance(List<Object> menuTree){
+    public static MenuBar getInstance(List<String> menuTree, List<ChangeListener<Boolean>> listeners,
+                                      List<EventHandler<ActionEvent>> handlers){
         Stack<Menu> s = new Stack<>();
         MenuBar mb = new MenuBar();
+        int listenerDex = 0;
+        int handlerDex = 0;
         // Do a DFS for nested menus
         for (int i = 0; i < menuTree.size(); ++i) {
-            String entry;
-            if(!(menuTree.get(i) instanceof String)){
-                entry = (String) menuTree.get(i);
-            }
-            else throw new IllegalArgumentException(String.format(ERROR, menuTree.get(i).getClass().toString(), "String"));
-            switch (entry) {
-                case MENU: {
-                    Menu m;
-                    if(menuTree.get(++i) instanceof String)
-                        m = MenuFactory.getInstance(menuTree.get(i).toString());
-                    else throw new IllegalArgumentException(String.format(ERROR, menuTree.get(i).getClass().toString(), "String"));
-                    if(s.isEmpty()){ // At the root level since nothing is on the stack -- add this menu directly to the bar
+            String enty = menuTree.get(i);
+            switch (enty){
+                case MENU:
+                    String label = menuTree.get(++i);
+                    Menu m = MenuFactory.getInstance(label);
+                    if(s.isEmpty()) // At top level, add this menu directly to the bar
                         mb.getMenus().add(m);
-                    }
-                    else { // This menu belongs to another menu already, so add it as a child
-                        Menu parent = s.peek();
-                        parent.getItems().add(m);
-                    }
+                    else
+                        s.peek().getItems().add(m);
                     s.push(m);
                     break;
-                }
-                case MENU_ITEM: {
+                case MENU_ITEM:
+                    String type = menuTree.get(++i);
+                    String label1 = menuTree.get(++i);
                     MenuItem mi;
-                    if(menuTree.get(++i) instanceof String && menuTree.get(++i) instanceof String)
-                        mi = MenuItemFactory.getInstance(menuTree.get(i-1).toString(), menuTree.get(i).toString(), menuTree.get(++i));
-                    else throw new IllegalArgumentException(String.format(ERROR, menuTree.get(i).getClass().toString(), "String"));
-                    Menu m = s.peek();
-                    m.getItems().add(mi);
+                    if(MenuItemFactory.DEFAULT_MENU.equals(type))
+                        mi = MenuItemFactory.getInstance(label1, handlers.get(handlerDex++));
+                    else
+                        mi = MenuItemFactory.getInstance(label1, listeners.get(listenerDex++));
+                    s.peek().getItems().add(mi);
                     break;
-                }
-                case BREAK: // We're coming back up the tree, so this menu has no more children
+                case BREAK:
                     s.pop();
                     break;
-                default:
-                    throw new IllegalArgumentException("Unrecognized menu type");
+                default: throw new IllegalArgumentException("Unrecognized menu type");
             }
-
         }
-        return mb;
-    }
-
-    public static MenuBar getInstance(List<String> menuTitles, List<List<String>> subMenuLabels,
-                                      List<List<List<EventHandler<ActionEvent>>>> subMenuActions){
-        if(menuTitles.size() != subMenuLabels.size() || subMenuLabels.size() != subMenuActions.size())
-            throw new IllegalArgumentException("Size mismatch for menu titles, labels, or actions");
-        MenuBar mb = getInstance();
-        //addMenus(menuTitles, subMenuLabels, subMenuActions, mb);
         return mb;
     }
 

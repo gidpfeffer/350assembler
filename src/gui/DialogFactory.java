@@ -6,6 +6,7 @@ import javafx.geometry.Insets;
 import javafx.scene.control.*;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.Priority;
+import javafx.stage.DirectoryChooser;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -23,7 +24,7 @@ public class DialogFactory {
     //kept in program since storing it in a file could cause a FileNotFound exception that
     //need this string to display the error
     //needs these strings to display the error
-    public static final String ERROR_MESSAGE = "Sorry, your request cannot be completed. Please try again.";
+    public static final String ERROR_MESSAGE = "I'm sorry Dave, I'm afraid I can't do that.";
     public static final String ERROR_TITLE = "Error";
     public static final String STACKTRACE_LABEL = "The exception stacktrace was:";
 
@@ -46,7 +47,7 @@ public class DialogFactory {
     public static void showError(Exception e){
         Alert alert = getAlert(e);
         String exceptionText = getStacktraceString(e);
-        System.out.println(exceptionText);
+        System.err.println(exceptionText);
         formatAlert(alert, exceptionText);
         alert.show();
     }
@@ -105,39 +106,6 @@ public class DialogFactory {
         showError(new Exception(error));
     }
 
-
-    private static void addFieldsToBox(@SuppressWarnings("rawtypes") Dialog dialog, ButtonType okay, ButtonType cancel, GridPane grid, TextField entry) {
-        dialog.getDialogPane().getButtonTypes().addAll(okay, cancel);
-        dialog.getDialogPane().setContent(grid);
-        Platform.runLater(entry::requestFocus);
-    }
-
-    @SuppressWarnings("unchecked")
-    private static void createTextCallback(List<String> fields, Dialog dialog, ButtonType okay, TextField[] entries) {
-        dialog.setResultConverter(dialogButton -> {
-            if(dialogButton == okay) {
-                String[] ret = new String[fields.size()];
-                for(int i = 0; i < fields.size(); i++){
-                    ret[i] = entries[i].getText();
-                }
-                return ret;
-            }
-            else return new String[0];
-        });
-    }
-
-    private static void displayEntries(String field, GridPane grid, TextField[] entries, int i) {
-        entries[i] = new TextField();
-        entries[i].setPromptText(field);
-        grid.add(entries[i], 0, i);
-    }
-
-    private static void setPaddings(GridPane grid) {
-        grid.setHgap(10);
-        grid.setVgap(10);
-        grid.setPadding(new Insets(20, 150, 10, 10));
-    }
-
     /**
      *
      * Get a file by creating a file choose dialog. If the user chooses nothing,
@@ -162,18 +130,16 @@ public class DialogFactory {
      * Save to a file by creating a file choose dialog. If the user chooses nothing,
      * null is returned and therefore must be checked for
      *
-     * @param typeArgs list of window title and allowed file extensions. Must be ordered as title first,
-     *                 then pairs of 'file type name' (image, text file, css document, etc) and file extension
-     *                 (.png, .jpg, .txt, etc). File extensions must be decimated by only semicolons without
-     *                 whitespace
+     *
      * @return The user chose file. Might be null if they choose nothing. Null must be returned since callers
      *          will want to handle a lack of selection individually
      */
-    public static File fileSaveChooser(String... typeArgs){
+    public static File fileSaveChooser(){
         ArrayList<String> extensions = new ArrayList<>();
-        FileChooser chooser = setUpFileChooser("Save file", typeArgs, extensions);
-        File f = chooser.showSaveDialog(new Stage());
-        return checkValidFile(extensions, f);
+        DirectoryChooser chooser = new DirectoryChooser();
+        chooser.setTitle("Save file location");
+        File f = chooser.showDialog(new Stage());
+        return f;
     }
 
     private static File checkValidFile(ArrayList<String> extensions, File f) {
