@@ -220,13 +220,18 @@ public class Parser {
 		String aluCode = instr.getALUopcode();
 		
 		boolean shiftInstr = instr == Instruction.SRA || instr == Instruction.SLL || instr == Instruction.SRL;
+		boolean isAddi = instr == Instruction.ADDI;
 		if (!shiftInstr) {
 		    try {
                 rtCode = toBinary(parseRegister(arg1), 5);
             } catch (IllegalArgumentException e){
-                String message = String.format(BadInstructionException.MSG_TEMPLATE, "R", getOriginalInstruction(splitLine),
-                        e.getMessage());
-                throw new BadInstructionException(message);
+		        if(isAddi)
+		            rtCode = toBinary(Integer.parseInt(arg1),5);
+		        else {
+                    String message = String.format(BadInstructionException.MSG_TEMPLATE, "R", getOriginalInstruction(splitLine),
+                            e.getMessage());
+                    throw new BadInstructionException(message);
+                }
             }
 		} else {
 		    try {
