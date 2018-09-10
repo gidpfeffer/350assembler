@@ -97,7 +97,8 @@ public class GUI implements Executable{
     private void buildButtons() {
         List<String> labels = List.of("Launch", "...", "...");
         List<EventHandler<ActionEvent>> actions = List.of((e)->go(),
-                e->assignField(input, DialogFactory.fileLoadChooser("MIPS code (*.s)", "*.s")),
+                e->assignField(input, DialogFactory.fileLoadChooser("MIPS code (*.s)", "*.s",
+                        "Assembly code (*.asm)", "*.asm")),
                 e->assignField(output, DialogFactory.fileSaveChooser()));
         for(int i = 0; i < labels.size(); ++i)
             buttons.add(ButtonFactory.getInstance(labels.get(i), actions.get(i)));
@@ -172,11 +173,12 @@ public class GUI implements Executable{
     }
 
     private void encodeAllFiles(File in, File out) throws IOException, BadInstructionException{
-        Collection<File> files = new ArrayList<>(Arrays.asList(in.listFiles()));
-        for (File file : files) {
+        Queue<File> files = new LinkedList<>(Arrays.asList(in.listFiles()));
+        while(!files.isEmpty()) {
+            File file = files.remove();
             if(listenerMap.get("subdirs").getCurrentState() && file.isDirectory()){
                 files.addAll(Arrays.asList(file.listFiles()));
-            } else {
+            } else if(!file.isDirectory()){
                 String name = file.getName();
                 File outputFile = getOutputFileFromDirectory(out, name);
                 writeFile(file, outputFile);
@@ -191,7 +193,7 @@ public class GUI implements Executable{
         return new File(String.join(File.separator, out.getCanonicalPath(), sb.toString()));
     }
 
-    private void writeFile(File fin, File fout) throws IOException, BadInstructionException {
+    private void writeFile(File fin, File fout) throws IOException {
         log.appendText(String.format("Attempting to write %s to %s\n", fin.getName(), fout.getName()));
         if(fout.exists() && !listenerMap.get("overwrite").getCurrentState()){
             log.appendText(String.format("File %s already exists. To set overwrite, update menu setting in File->Overwrite Files\n", fout.getName()));
@@ -199,10 +201,17 @@ public class GUI implements Executable{
         }
         FileInputStream fis = new FileInputStream(fin);
         FileOutputStream fos = new FileOutputStream(fout);
-        System.out.println(listenerMap.get("all").getCurrentState());
-        assembler.writeTo(fis,fos,listenerMap.get("all").getCurrentState());
-        fis.close();
-        fos.close();
-        log.appendText("Success\n");
+        try {
+            assembler.writeTo(fis, fos, listenerMap.get("all").getCurrentState());
+            fis.close();
+            fos.close();
+            log.appendText("Success\n");
+        } catch (BadInstructionException e) {
+            DialogFactory.showError(e);
+            fos.close();
+            fis.close();
+            fout.delete();
+            log.appendText(String.format("!!FAILURE!! -- %s", e.getMessage()));
+        }
     }
 }

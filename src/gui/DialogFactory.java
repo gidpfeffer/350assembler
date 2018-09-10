@@ -28,12 +28,8 @@ public class DialogFactory {
     public static final String ERROR_TITLE = "Error";
     public static final String STACKTRACE_LABEL = "The exception stacktrace was:";
 
-    public static final int PAIR = 2;
-    public static final ButtonType OKAY = ButtonType.OK;
     public static final int PREF_WIDTH = 750;
     public static final int PREF_HEIGHT = 200;
-    public static final String OKAY_TEXT = "Okay";
-    public static final String CANCEL_TEXT = "Cancel";
     public static final String BAD_FILE = "Invalid file selected";
 
 
@@ -135,7 +131,6 @@ public class DialogFactory {
      *          will want to handle a lack of selection individually
      */
     public static File fileSaveChooser(){
-        ArrayList<String> extensions = new ArrayList<>();
         DirectoryChooser chooser = new DirectoryChooser();
         chooser.setTitle("Save file location");
         File f = chooser.showDialog(new Stage());
@@ -165,7 +160,7 @@ public class DialogFactory {
         return chooser;
     }
 
-    private static String getExtension(File f){
+    public static String getExtension(File f){
         String fname = f.getName();
         int index = fname.lastIndexOf(".");
         if(index > 0)

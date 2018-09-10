@@ -30,7 +30,7 @@ public class Parser {
 		case JII: 	return parseJIIType(split_line, instr);
 		case L:		return parseLType(split_line, instr);
 		case NOOP: 	return toBinary(0, 32);
-		default: 	throw new BadInstructionException(String.format("Unrecognized instruction type: %s", split_line[0]));
+		default: 	throw new BadInstructionException(String.format("Unrecognized instruction type: %s\n", split_line[0]));
 		}
 		
 	}
@@ -178,7 +178,7 @@ public class Parser {
 		try {
 			value = Integer.valueOf(N);
 		} catch ( NumberFormatException nfe) {
-			throw new IllegalArgumentException("Illegal immediate value: " + N);
+			throw new IllegalArgumentException(String.format("Illegal immediate value: %d\n", N));
 		}
 
 		return toBinary(value, 17);
@@ -258,11 +258,11 @@ public class Parser {
 		try {
 			value = Integer.valueOf(shamt);
 		} catch (NumberFormatException nfe) {
-			throw new IllegalArgumentException(String.format("Cannot parse %s to a numeric value", shamt));
+			throw new IllegalArgumentException(String.format("Cannot parse %s to a numeric value\n", shamt));
 		}
 				
 		if (value < 0 || MAX_SHAMT < value ) {
-			throw new IllegalArgumentException(String.format("Shamt of %d is not within allowed range", value));
+			throw new IllegalArgumentException(String.format("Shamt of %d is not within allowed range\n", value));
 		}
 		
 		return value;
@@ -277,7 +277,7 @@ public class Parser {
 	static int parseRegister(String regCode) throws IllegalArgumentException{
 
 		if (!regCode.contains("$")) {
-			throw new IllegalArgumentException(String.format("RegCode of %s is invalid: must start with $", regCode));
+			throw new IllegalArgumentException(String.format("RegCode of %s is invalid: must start with $\n", regCode));
 		}
 
 		// Replace snow flake registers with equivalent
@@ -295,11 +295,11 @@ public class Parser {
 		try {
 			regNum =  Integer.valueOf(regCode);
 		} catch (NumberFormatException nfe) {
-			throw new IllegalArgumentException(String.format("RegCode of %s does not map to a 32-bit int value", regCode));
+			throw new IllegalArgumentException(String.format("RegCode of %s does not map to a 32-bit int value\n", regCode));
 		}
 
 		if (regNum < 0 || 32 <= regNum) {
-			throw new IllegalArgumentException(String.format("Register value of %d does not map a register index between 0 and 31", regNum));
+			throw new IllegalArgumentException(String.format("Register value of %d does not map a register index between 0 and 31\n", regNum));
 		}
 
 		return regNum;

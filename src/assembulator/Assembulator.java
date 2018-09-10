@@ -108,9 +108,12 @@ public class Assembulator implements Assembler{
 			}
 			return s + " nop";
 		};
+
+		Function<String, String> removeSemicolons = s-> s.split(";")[0];
 		
 		List<String> filteredCode = rawAssembly.stream().map(addNopToEmptyTargetLines)
 														.filter(EmptyAndCommentOnlyLines)
+                                                        .map(removeSemicolons)
 														.collect(Collectors.toList());
 
 		trimTargetsFromCode(filteredCode);
