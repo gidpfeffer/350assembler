@@ -8,9 +8,9 @@
 
 ### About
 
-1. **What is:** this is a simple parser that converts MIPS code into machine code using the ISA provided in the Duke ECE350 handout. The code isn't super elegant and only does basic error checking, so ideally make sure there aren't any mistakes when you write it.
-2. **How to:** (1) clone or download the repo, (2) write your mips code in any file, but give it a .s extention, (3) launch the GUI from the provided jar
-3. Things you **CAN** do: (1) write comments using "#" to start a line, (2) use nop's by typing nop (3) use $rstatus as syntax, (4) use $ra as syntax (5) use all other instructions in the correct syntax, found in our handout and also included below
+1. **What is:** this is a simple parser that converts MIPS code into machine code using the ISA provided in the Duke ECE350 handout.
+2. **How to:** (1) clone or download the repo, (2) write your mips code in any file, (3) launch the GUI from the provided jar
+3. Things you **CAN** do: (1) write comments using "#" to start a line, (2) use noop's by typing noop (3) use $rstatus as syntax, (4) use $ra as syntax (5) have trailing semicolons on lines (6) Use a directory as input (7) Have the assembler pad each instruction with noops to prevent hazards (8) use all other instructions in the correct syntax, found in our handout and also included below
 
 ### Instructions
 
