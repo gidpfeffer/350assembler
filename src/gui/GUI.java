@@ -22,7 +22,6 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
-import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -172,7 +171,7 @@ public class GUI implements Executable{
         }
     }
 
-    private void encodeAllFiles(@NotNull File in, File out) throws IOException, BadInstructionException{
+    private void encodeAllFiles(File in, File out) throws IOException, BadInstructionException{
         Collection<File> files = Arrays.asList(in.listFiles());
         for (File file : files) {
             if(listenerMap.get("subdirs").getCurrentState() && file.isDirectory()){
