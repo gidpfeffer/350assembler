@@ -97,7 +97,7 @@ public class GUI implements Executable{
     private void buildButtons() {
         List<String> labels = List.of("Launch", "...", "...");
         List<EventHandler<ActionEvent>> actions = List.of((e)->go(),
-                e->assignField(input, DialogFactory.fileLoadChooser("MIPS code", "*.s")),
+                e->assignField(input, DialogFactory.fileLoadChooser("MIPS code (*.s)", "*.s")),
                 e->assignField(output, DialogFactory.fileSaveChooser()));
         for(int i = 0; i < labels.size(); ++i)
             buttons.add(ButtonFactory.getInstance(labels.get(i), actions.get(i)));
@@ -126,8 +126,8 @@ public class GUI implements Executable{
         listenerMap.put("outdir", new MenuListener<>());
         listenerMap.put("clcEach", new MenuListener<>());
         for(MenuListener<Boolean> ml : listenerMap.values()) ml.setDefaultState(false);
-        List<ChangeListener<Boolean>> listeners = List.of(listenerMap.get("overwrite"),
-                listenerMap.get("all"), listenerMap.get("none"),
+        List<ChangeListener<Boolean>> listeners = List.of(
+                listenerMap.get("all"), listenerMap.get("none"), listenerMap.get("overwrite"),
                 listenerMap.get("subdirs"), listenerMap.get("outdir"), listenerMap.get("clcEach"));
         List<EventHandler<ActionEvent>> handlers = List.of(e->log.clear());
         topBar = MenuBarFactory.getInstance(structure, listeners, handlers);
@@ -172,7 +172,7 @@ public class GUI implements Executable{
     }
 
     private void encodeAllFiles(File in, File out) throws IOException, BadInstructionException{
-        Collection<File> files = Arrays.asList(in.listFiles());
+        Collection<File> files = new ArrayList<>(Arrays.asList(in.listFiles()));
         for (File file : files) {
             if(listenerMap.get("subdirs").getCurrentState() && file.isDirectory()){
                 files.addAll(Arrays.asList(file.listFiles()));
@@ -199,10 +199,10 @@ public class GUI implements Executable{
         }
         FileInputStream fis = new FileInputStream(fin);
         FileOutputStream fos = new FileOutputStream(fout);
-        assembler.writeTo(fis,fos);
+        System.out.println(listenerMap.get("all").getCurrentState());
+        assembler.writeTo(fis,fos,listenerMap.get("all").getCurrentState());
         fis.close();
         fos.close();
         log.appendText("Success\n");
     }
-
 }

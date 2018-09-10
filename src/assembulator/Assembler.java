@@ -13,5 +13,5 @@ public interface Assembler {
      * @param is Stream to read from
 	 * @param os Stream to write to
 	 */
-	public void writeTo(InputStream is, OutputStream os) throws BadInstructionException;
+	public void writeTo(InputStream is, OutputStream os, boolean pad) throws BadInstructionException;
 }

@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
  **/
 public class Assembulator implements Assembler{
 
-	private static final String ADDR_RADIX = "ADDRESS_RADIX = DEC;";
+    private static final String ADDR_RADIX = "ADDRESS_RADIX = DEC;";
 	private static final String DATA_RADIX = "DATA_RADIX = BIN;";
 
 	private static final String DEPTH_FORMAT = "DEPTH = %d;";
@@ -28,13 +28,14 @@ public class Assembulator implements Assembler{
 	private static final int WIDTH = 32;
 
 	private static final int NOP_PAD = 1;
+    public static final List<String> NOOP = List.of("noop", "noop", "noop", "noop");
 
-	private List<String> rawAssembly = new ArrayList<>();
+    private List<String> rawAssembly = new ArrayList<>();
 	private Map<String, Integer> jumpTargets = new HashMap<>();
 	
 	private String filename;
 
-	public Assembulator(){}
+	public Assembulator(){};
 
     /**
      *  @Deprecated Each call to writeTo should specify the target to read from.
@@ -45,19 +46,21 @@ public class Assembulator implements Assembler{
 	}
 
 	@Override
-	public void writeTo(InputStream is, OutputStream os) throws BadInstructionException{
-        loadFile(is);
+	public void writeTo(InputStream is, OutputStream os, boolean padding) throws BadInstructionException{
+        loadFile(is, padding);
 		List<String> filteredCode = filterCode(rawAssembly);
 		List<String> parsedCode = parseCode(filteredCode);		
 		writeCode(new PrintStream(os), filteredCode, parsedCode);
 	}
 
-	private void loadFile(InputStream is){
+	private void loadFile(InputStream is, boolean shouldPad){
 	   String line;
 	   BufferedReader r = new BufferedReader(new InputStreamReader(is));
 	   try{
 	       while((line = r.readLine()) != null){
                rawAssembly.add(line);
+               if(shouldPad)
+                   rawAssembly.addAll(NOOP);
            }
            r.close();
        } catch (IOException e){

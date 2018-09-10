@@ -30,7 +30,7 @@ public class Parser {
 		case JII: 	return parseJIIType(split_line, instr);
 		case L:		return parseLType(split_line, instr);
 		case NOOP: 	return toBinary(0, 32);
-		default: 	return "";
+		default: 	throw new BadInstructionException(String.format("Unrecognized instruction type: %s", split_line[0]));
 		}
 		
 	}
