@@ -47,7 +47,7 @@ public class GUI implements Executable{
 
     public GUI(Stage s){
         init();
-        bp.setPrefHeight(PREF_SIZE);
+        bp.setPrefHeight(PREF_SIZE); // TODO clean this up -- split into subcalls
         bp.setPrefWidth(PREF_SIZE);
         bp.setPadding(new Insets(PADDING));
         log.setEditable(false);
@@ -70,7 +70,7 @@ public class GUI implements Executable{
         BorderPane but = new BorderPane();
         but.setRight(buttons.get(0));
         //bp.setTop(topBar);
-        BorderPane logoPane = new BorderPane();
+        BorderPane logoPane = new BorderPane(); // TODO make geometry factory or some shit -- this is bad
         logoPane.setCenter(title);
         bp.setTop(logoPane);
         title.setPreserveRatio(true);
@@ -122,12 +122,12 @@ public class GUI implements Executable{
         );
         listenerMap.put("overwrite", new MenuListener<>());
         listenerMap.put("all", new MenuListener<>());
-        listenerMap.put("none", new MenuListener<>());
+        listenerMap.put("none", new MenuListener<>()); // TODO Make factory
         listenerMap.put("subdirs", new MenuListener<>());
         listenerMap.put("outdir", new MenuListener<>());
         listenerMap.put("clcEach", new MenuListener<>());
-        for(MenuListener<Boolean> ml : listenerMap.values()) ml.setDefaultState(false);
-        List<ChangeListener<Boolean>> listeners = List.of(
+        for(MenuListener<Boolean> ml : listenerMap.values()) ml.setDefaultState(false); // TODO set some to true
+        List<ChangeListener<Boolean>> listeners = List.of( // TODO make into map
                 listenerMap.get("all"), listenerMap.get("none"), listenerMap.get("overwrite"),
                 listenerMap.get("subdirs"), listenerMap.get("outdir"), listenerMap.get("clcEach"));
         List<EventHandler<ActionEvent>> handlers = List.of(e->log.clear());
@@ -148,8 +148,9 @@ public class GUI implements Executable{
             DialogFactory.showError(e);
         }
     }
+
     @Override
-    public void go(){
+    public void go(){ // TODO break up into smaller methods
         if(listenerMap.get("clcEach").getCurrentState()) log.clear(); // clear before each run == true
         String inString = input.getText();
         String outString = output.getText();
@@ -158,7 +159,8 @@ public class GUI implements Executable{
             return;
         }
         File in = new File(inString);
-        File out = (listenerMap.get("outdir").getCurrentState()) ? new File(String.join(File.separator, outString, "mif_outputs")) : new File(outString);
+        File out = (listenerMap.get("outdir").getCurrentState()) ? new File(String.join(File.separator,
+                outString, "mif_outputs")) : new File(outString);
         if(!out.exists()) out.mkdirs();
         try {
             if (in.isDirectory()) {
@@ -166,7 +168,7 @@ public class GUI implements Executable{
             } else {
                 writeFile(in, getOutputFileFromDirectory(out, in.getName()));
             }
-        } catch(IOException | BadInstructionException e){
+        } catch(IOException e){
             DialogFactory.showError(e);
             log.appendText(String.format("!!FAILURE!! -- %s\n", e.getMessage()));
         }
@@ -179,7 +181,7 @@ public class GUI implements Executable{
             if(listenerMap.get("subdirs").getCurrentState() && file.isDirectory()){
                 files.addAll(Arrays.asList(file.listFiles()));
             } else if(!file.isDirectory()){
-                String name = file.getName();
+                String name = file.getName(); // TODO extract method -- also replace line 168
                 File outputFile = getOutputFileFromDirectory(out, name);
                 writeFile(file, outputFile);
             }
@@ -204,12 +206,12 @@ public class GUI implements Executable{
         try {
             assembler.writeTo(fis, fos, listenerMap.get("all").getCurrentState());
             fis.close();
-            fos.close();
+            fos.close(); // TODO extract method
             log.appendText("Success\n");
         } catch (BadInstructionException e) {
             DialogFactory.showError(e);
             fos.close();
-            fis.close();
+            fis.close(); // TODO extract method
             fout.delete();
             log.appendText(String.format("!!FAILURE!! -- %s", e.getMessage()));
         }
