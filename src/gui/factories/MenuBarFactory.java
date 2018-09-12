@@ -1,8 +1,10 @@
 package gui.factories;
 
+import gui.MenuListener;
 import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
+import javafx.scene.control.CheckMenuItem;
 import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
@@ -24,12 +26,10 @@ public class MenuBarFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static MenuBar getInstance(List<String> menuTree, List<ChangeListener<Boolean>> listeners,
-                                      List<EventHandler<ActionEvent>> handlers){
+    public static MenuBar getInstance(List<String> menuTree, Map<String, CheckMenuItem> listeners,
+                                      Map<String, EventHandler<ActionEvent>> handlers){
         Stack<Menu> s = new Stack<>();
         MenuBar mb = new MenuBar();
-        int listenerDex = 0;
-        int handlerDex = 0;
         // Do a DFS for nested menus
         for (int i = 0; i < menuTree.size(); ++i) {
             String enty = menuTree.get(i);
@@ -48,9 +48,12 @@ public class MenuBarFactory {
                     String label1 = menuTree.get(++i);
                     MenuItem mi;
                     if(MenuItemFactory.DEFAULT_MENU.equals(type))
-                        mi = MenuItemFactory.getInstance(label1, handlers.get(handlerDex++));
-                    else
-                        mi = MenuItemFactory.getInstance(label1, listeners.get(listenerDex++));
+                        mi = MenuItemFactory.getInstance(label1, handlers.get(menuTree.get(++i)));
+                    else {
+                        String key = menuTree.get(++i);
+                        mi = MenuItemFactory.getInstance(label1, menuTree.get(++i));
+                        listeners.put(key, (CheckMenuItem) mi);
+                    }
                     s.peek().getItems().add(mi);
                     break;
                 case BREAK:

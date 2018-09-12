@@ -1,23 +1,44 @@
 package gui;
 
+
 import javafx.beans.value.ChangeListener;
 import javafx.beans.value.ObservableValue;
 
-public class MenuListener<T> implements ChangeListener<T> {
+import java.util.ArrayList;
+import java.util.List;
 
-    private T currentState;
+public class MenuListener implements ChangeListener<Boolean> {
+
+    private Boolean currentState;
+    private List<MenuListener> exclusives = new ArrayList<>();
 
     @Override
-    public void changed(ObservableValue<? extends T> observable, T oldValue, T newValue) {
+    public void changed(ObservableValue<? extends Boolean> observable, Boolean oldValue, Boolean newValue) {
         currentState = newValue;
+        enforceExclusives();
+
     }
 
-    public void setDefaultState(T state){
-        if(currentState == null)
-            currentState = state;
+    private void enforceExclusives() {
+        for(MenuListener ml : exclusives){
+            ml.update(!currentState);
+        }
     }
 
-    public T getCurrentState(){
+    public void update(Boolean state){
+        currentState = state;
+    }
+
+    public void setState(Boolean state){
+        currentState = state;
+        enforceExclusives();
+    }
+
+    public Boolean getCurrentState(){
         return currentState;
+    }
+
+    public void setExclusiveWith(MenuListener menuListener){
+        exclusives.add(menuListener);
     }
 }
