@@ -18,10 +18,7 @@ import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 
 public class GUI implements Executable{
@@ -43,6 +40,8 @@ public class GUI implements Executable{
     public static final String CLC_NOW = "CLC_NOW";
     public static final String FALSE = "false";
     public static final String TRUE = "true";
+    public static final Map<String, String> EXTENTIONS = Map.of("MIPS Code", "*.s", "Assembly Code", "*.asm");
+    public static final String OUTPUT_FILE_NAME = "mif_outputs";
 
     private TextField input ;
     private TextField output;
@@ -125,9 +124,14 @@ public class GUI implements Executable{
 
     private void buildButtons() {
         Map<String, String> labels = Map.of(LAUNCH, "Launch", INPUT_BUTTON,"...", OUTPUT_BUTTON,"...");
+        String[] extensions = new String[EXTENTIONS.size()*2];
+        int i = 0;
+        for(String fileType : EXTENTIONS.keySet()){
+            extensions[i++] = fileType + " (" + EXTENTIONS.get(fileType) + ")";
+            extensions[i++] = EXTENTIONS.get(fileType);
+        }
         Map<String, EventHandler<ActionEvent>> actions = Map.of(LAUNCH, (e)->go(),
-                INPUT_BUTTON, e->assignField(input, DialogFactory.fileLoadChooser("MIPS code (*.s)", "*.s",
-                        "Assembly code (*.asm)", "*.asm")),
+                INPUT_BUTTON, e->assignField(input, DialogFactory.fileLoadChooser(extensions)),
                 OUTPUT_BUTTON, e->assignField(output, DialogFactory.fileSaveChooser()));
         for(String button : labels.keySet())
             buttons.put(button, ButtonFactory.getInstance(labels.get(button), actions.get(button)));
@@ -182,16 +186,20 @@ public class GUI implements Executable{
     @Override
     public void go(){ // TODO break up into smaller methods
         if(listenerMap.get("clcEach").isSelected()) log.clear(); // clear before each run == true
+
         String inString = input.getText();
         String outString = output.getText();
         if(inString.isEmpty() || outString.isEmpty()){
             DialogFactory.showError("Must specify input and output locations.");
             return;
         }
+
         File in = new File(inString);
-        File out = (listenerMap.get("outdir").isSelected()) ? new File(String.join(File.separator,
-                outString, "mif_outputs")) : new File(outString);
+        File out = (listenerMap.get(CREATE_OUT_DIR).isSelected()) ? new File(String.join(File.separator,
+                outString, OUTPUT_FILE_NAME)) : new File(outString);
+
         if(!out.exists()) out.mkdirs();
+
         try {
             if (in.isDirectory()) {
                 encodeAllFiles(in, out);
@@ -208,14 +216,18 @@ public class GUI implements Executable{
         Queue<File> files = new LinkedList<>(Arrays.asList(in.listFiles()));
         while(!files.isEmpty()) {
             File file = files.remove();
-            if(listenerMap.get("subdirs").isSelected() && file.isDirectory()){
+            if(listenerMap.get(SEARCH_SUBDIRS).isSelected() && file.isDirectory()){
                 files.addAll(Arrays.asList(file.listFiles()));
-            } else if(!file.isDirectory()){
-                String name = file.getName(); // TODO extract method -- also replace line 168
-                File outputFile = getOutputFileFromDirectory(out, name); // TODO check for valid extension -- .s, .asm
+            } else if(!file.isDirectory() && isValidFileType(file)){
+                String name = file.getName();
+                File outputFile = getOutputFileFromDirectory(out, name);
                 writeFile(file, outputFile);
             }
         }
+    }
+
+    private boolean isValidFileType(File file) {
+        return EXTENTIONS.values().contains(DialogFactory.getExtension(file));
     }
 
     private File getOutputFileFromDirectory(File out, String name) throws IOException {
@@ -227,23 +239,25 @@ public class GUI implements Executable{
 
     private void writeFile(File fin, File fout) throws IOException {
         log.appendText(String.format("Attempting to write %s to %s\n", fin.getName(), fout.getName()));
-        if(fout.exists() && !listenerMap.get("overwrite").isSelected()){
+        if(fout.exists() && !listenerMap.get(OVERWRITE).isSelected()){
             log.appendText(String.format("File %s already exists. To set overwrite, update menu setting in File->Overwrite Files\n", fout.getName()));
             return;
         }
         FileInputStream fis = new FileInputStream(fin);
         FileOutputStream fos = new FileOutputStream(fout);
         try {
-            assembler.writeTo(fis, fos, listenerMap.get("all").isSelected());
-            fis.close();
-            fos.close(); // TODO extract method
-            log.appendText("Success\n");
+            assembler.writeTo(fis, fos, listenerMap.get(PAD_ALL).isSelected());
+            closeAndWriteLog(fis, fos, "Success\n");
         } catch (BadInstructionException e) {
             DialogFactory.showError(e);
-            fos.close();
-            fis.close(); // TODO extract method
+            closeAndWriteLog(fis, fos, String.format("!!FAILURE!! -- %s", e.getMessage()));
             fout.delete();
-            log.appendText(String.format("!!FAILURE!! -- %s", e.getMessage()));
         }
+    }
+
+    private void closeAndWriteLog(InputStream in, OutputStream out, String msg) throws IOException{
+        in.close();
+        out.close();
+        log.appendText(msg);
     }
 }
