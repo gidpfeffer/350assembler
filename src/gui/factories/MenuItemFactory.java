@@ -2,14 +2,10 @@ package gui.factories;
 
 
 import gui.GUI;
-import gui.MenuListener;
 import javafx.beans.value.ChangeListener;
-import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckMenuItem;
-import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
-import javafx.scene.control.RadioMenuItem;
 
 
 public class MenuItemFactory {

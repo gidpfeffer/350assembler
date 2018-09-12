@@ -1,7 +1,5 @@
 package gui.factories;
 
-import gui.MenuListener;
-import javafx.beans.value.ChangeListener;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.CheckMenuItem;
@@ -9,7 +7,6 @@ import javafx.scene.control.Menu;
 import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
@@ -63,15 +60,5 @@ public class MenuBarFactory {
             }
         }
         return mb;
-    }
-
-    private static void addMenus(List<String> menuTitles, List<List<String>> subMenuLabels,
-                                 List<List<EventHandler<ActionEvent>>> subMenuActions, MenuBar mb) {
-        for(int i = 0; i < subMenuLabels.size(); ++i){
-            String menuTitle = menuTitles.get(i);
-            var labels = subMenuLabels.get(i);
-            var actions = subMenuActions.get(i);
-            mb.getMenus().add(MenuFactory.getInstance(menuTitle, labels, actions));
-        }
     }
 }
