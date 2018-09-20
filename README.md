@@ -25,7 +25,7 @@
 (6) Use a directory as input  
 (7) Have the assembler pad each instruction with noops to prevent hazards  
 (8) use all other instructions in the correct syntax, found in our handout and also included below 
-5. Things you **CANNOT** do:
+5. Things you **CANNOT** do:  
 (1) use labeled branching
 
 ### Instructions
