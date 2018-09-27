@@ -42,6 +42,7 @@ public class GUI implements Executable{
     public static final String TRUE = "true";
     public static final Map<String, String> EXTENTIONS = Map.of("MIPS Code", "*.s", "Assembly Code", "*.asm");
     public static final String OUTPUT_FILE_NAME = "mif_outputs";
+    public static final String WINDOW_TITLE = "350 Assembler v2.0";
 
     private TextField input ;
     private TextField output;
@@ -58,6 +59,7 @@ public class GUI implements Executable{
         initElements();
         Scene scene = new Scene(packageElements());
         s.setScene(scene);
+        s.setTitle(WINDOW_TITLE);
         s.show();
     }
 
@@ -157,7 +159,7 @@ public class GUI implements Executable{
         //Sadly can't be done automatically -- each menu may do something different
         handlerMap.put(CLC_NOW, e->log.clear());
 
-        topBar = MenuBarFactory.getInstance(structure, listenerMap, handlerMap);
+        topBar = MenuBarFactory.getInstance(structure, listenerMap, handlerMap); // Make DFS on menu structure
         makeExclusive(listenerMap.get(PAD_ALL), listenerMap.get(PAD_NONE));
     }
 
