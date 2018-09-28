@@ -2,6 +2,7 @@ package assembulator;
 
 import gui.DialogFactory;
 import instructions.BadInstructionException;
+import instructions.Instruction;
 import parsing.Parser;
 
 import java.io.*;
@@ -29,8 +30,11 @@ public class Assembulator implements Assembler{
 
 	private static final int NOP_PAD = 1;
     public static final List<String> NOOP = List.of("noop", "noop", "noop", "noop");
+	public static final Set<String> JI = Set.of(Instruction.J.getOpcode(), Instruction.JAL.getOpcode(), Instruction.BEX.getOpcode());
+	public static final Set<String> BRANCHES = Set.of(Instruction.BNE.getOpcode(), Instruction.BLT.getOpcode());
 
-    private List<String> rawAssembly = new ArrayList<>();
+
+	private List<String> rawAssembly = new ArrayList<>();
 	private Map<String, Integer> jumpTargets = new HashMap<>();
 	
 	private String filename;
@@ -145,18 +149,35 @@ public class Assembulator implements Assembler{
 	 * @return parsed code
 	 */
 	private List<String> parseCode(List<String> filteredCode) throws BadInstructionException {
-		Function<String, String> targetReplacer = s -> {
-			if (!s.matches("\\d+[a-zA-z_-]+")) {
-				return s;
-			}
-			String encoding = s.replaceAll("[a-zA-Z_-]", "");
-			int address = jumpTargets.get(s.replaceAll("\\d", ""));
-			return encoding + Parser.toBinary(NOP_PAD*address, 27);
-		};
+		List<String> binaryCode = new ArrayList<>();
+		for(int i = 0; i < filteredCode.size(); ++i){
+			String instr = filteredCode.get(i);
+			String parsed = Parser.parseLine(instr);
+			String replaced = targetReplacer(parsed, i);
+			binaryCode.add(replaced);
+		}
+		return binaryCode;
+	}
 
-		return filteredCode.parallelStream().map(Parser::parseLine)
-											.map(targetReplacer)
-											.collect(Collectors.toList());
+	private String targetReplacer(String s, int currentPC){
+		if (!s.matches("\\d+[a-zA-z_-]+")) {
+			return s;
+		}
+		String opcode = s.substring(0,5);
+		if(JI.contains(opcode)) {
+			System.out.println("Jumping: target is " + s);
+			String encoding = s.replaceAll("[a-zA-Z_-]", ""); // delete letters
+			int address = jumpTargets.get(s.replaceAll("\\d", "")); // get target
+			return encoding + Parser.toBinary(NOP_PAD * address, 27);
+		}
+		if(BRANCHES.contains(opcode)){
+			System.out.println("Branching target is " + s);
+			String encoding = s.replaceAll("[a-zA-Z_-]", ""); // delete letters
+			int T = jumpTargets.get(s.replaceAll("\\d", "")) - 1 - currentPC; // get target
+			return encoding + Parser.toBinary(T, 17);
+
+		}
+		throw new BadInstructionException("Malformed jump/branch instruction: " + s);
 	}
 
 	/**
