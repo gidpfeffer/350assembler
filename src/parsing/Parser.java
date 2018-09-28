@@ -1,6 +1,7 @@
 package parsing;
 
 
+import assembulator.Assembulator;
 import instructions.BadInstructionException;
 import instructions.Instruction;
 
@@ -154,17 +155,29 @@ public class Parser {
 		}
 		
 		String opcode = instr.getOpcode();
-		try {
-            String rsCode = toBinary(parseRegister(rs), 5);
-            String rdCode = toBinary(parseRegister(rd), 5);
-            String immediate = parseImmediate(N);
-            return opcode + rdCode + rsCode + immediate;
-        } catch (IllegalArgumentException e){
-		    String message = String.format(BadInstructionException.MSG_TEMPLATE, "I", getOriginalInstruction(splitLine),
-                    e.getMessage());
-		    throw new BadInstructionException(message);
-        }
-		
+		if(N.matches("-?\\d+(\\.\\d+)?")) {
+			try {
+				String rsCode = toBinary(parseRegister(rs), 5);
+				String rdCode = toBinary(parseRegister(rd), 5);
+				String immediate = parseImmediate(N);
+				return opcode + rdCode + rsCode + immediate;
+			} catch (IllegalArgumentException e) {
+				String message = String.format(BadInstructionException.MSG_TEMPLATE, "I", getOriginalInstruction(splitLine),
+						e.getMessage());
+				throw new BadInstructionException(message);
+			}
+		}
+		else {
+			try {
+				String rsCode = toBinary(parseRegister(rs), 5);
+				String rdCode = toBinary(parseRegister(rd), 5);
+				return opcode + rdCode + rsCode + N;
+			} catch (IllegalArgumentException e) {
+				String message = String.format(BadInstructionException.MSG_TEMPLATE, "I", getOriginalInstruction(splitLine),
+						e.getMessage());
+				throw new BadInstructionException(message);
+			}
+		}
 
 	}
 
