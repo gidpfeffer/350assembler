@@ -50,11 +50,13 @@ public class Assembulator implements Assembler{
 	}
 
 	@Override
-	public void writeTo(InputStream is, OutputStream os, boolean padding) throws BadInstructionException{
+	public void writeTo(InputStream is, OutputStream os, boolean padding) throws BadInstructionException {
         loadFile(is, padding);
 		List<String> filteredCode = filterCode(rawAssembly);
 		List<String> parsedCode = parseCode(filteredCode);		
 		writeCode(new PrintStream(os), filteredCode, parsedCode);
+		rawAssembly.clear();
+		jumpTargets.clear();
 	}
 
 	private void loadFile(InputStream is, boolean shouldPad){
@@ -84,8 +86,8 @@ public class Assembulator implements Assembler{
 			}
 			codeScan.close();
 		} catch (FileNotFoundException e) {
+		    DialogFactory.showError(e);
 			System.err.println("Error - File not found!: " + filename);
-			System.exit(1);
 		}
 	}
 
