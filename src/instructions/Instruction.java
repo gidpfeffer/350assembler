@@ -12,7 +12,7 @@ public enum Instruction {
 	DIV		(InstructionType.R,		"00111"),
 	SRL		(InstructionType.R, 	"01000"),
 	MULT	(InstructionType.R, 	"00110"),
-	DIVI	(InstructionType.R, 	"01010"),
+	DIVI	(InstructionType.R, 	"00111"),
 	REM		(InstructionType.R, 	"01011"),	
 	// Arithmetic (I) 				[opcode]
 	ADDI	(InstructionType.I,		"00101"),
