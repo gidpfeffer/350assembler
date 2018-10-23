@@ -11,7 +11,7 @@ public enum Instruction {
 	MUL		(InstructionType.R,		"00110"),
 	DIV		(InstructionType.R,		"00111"),
 	SRL		(InstructionType.R, 	"01000"),
-	MULT	(InstructionType.R, 	"01001"),
+	MULT	(InstructionType.R, 	"00110"),
 	DIVI	(InstructionType.R, 	"01010"),
 	REM		(InstructionType.R, 	"01011"),	
 	// Arithmetic (I) 				[opcode]
