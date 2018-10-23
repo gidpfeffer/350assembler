@@ -1,5 +1,7 @@
 # 350assembler
 
+Disclaimer: This software is provided "as is" with no warranty expressed or implied.
+
 **@author: pf51**  
 **@date: Nov 5 2017**  
 **@author: ghb51**  
