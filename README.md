@@ -52,3 +52,6 @@ Disclaimer: This software is provided "as is" with no warranty expressed or impl
     blt   $rd,   $rs,   N
     bex   T
     setx   T
+
+### Example
+See folder example for what the MIPS file should look like
