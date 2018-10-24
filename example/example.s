@@ -59,18 +59,18 @@ j 0
 
 check:
 #is the key supposed to be down?
-bne $0, $24, 3
+bne $0, $24, sk1
 addi $25, $0, 0
 addi $26, $0, 0
 jr $31
 #is the key down?
-bne $23, $0, 2
+sk1: bne $23, $0, sk2
 addi $26, $0, 0
 jr $31
 #has the score been incremented already?
-bne $25, $23, 2
+sk2: bne $25, $23, sk3
 addi $26, $0, 0
 jr $31
-addi $25, $0, 1
+sk3: addi $25, $0, 1
 addi $26, $0, 1
 jr $31
