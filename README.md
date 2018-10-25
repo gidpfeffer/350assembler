@@ -13,7 +13,9 @@ Disclaimer: This software is provided "as is" with no warranty expressed or impl
 ### About
 
 1. **What is:** this is a simple parser that converts MIPS code into machine code using the ISA provided in the Duke ECE350 handout.
-2. You need Java 10 to run this project. Find it here: https://www.oracle.com/technetwork/java/javase/archive-139210.html
+2. You need Java 10 to run this project. Find it here: https://www.oracle.com/technetwork/java/javase/archive-139210.html.   
+**IMPORTANT:** Do not use Java 11, as Java 11 no longer comes with JavaFX packaged into it, and there is not good way to add the library to jar at this time. Later, I *may* add a command line jar that will work with Java 11, but for now it is unsupported. If you really want to use Java 11, you can install JavaFX 11 at the link below, but note that you'll have to set up a Maven or Gradle package manager to correctly import that library.  
+https://gluonhq.com/products/javafx/
 3. **How to:**   
 (1) Clone or download the repo  
 (2) Write your mips code in any `.s` or `.asm` file   
@@ -31,6 +33,8 @@ Disclaimer: This software is provided "as is" with no warranty expressed or impl
 (8) Do labeled branching or jumping (ie, `j start`, `blt loop`)  
 (9) use all other instructions in the correct syntax, found in our handout and also included below 
 
+### Example
+See folder example for what the MIPS file should look like
 
 ### Instructions
 
@@ -52,6 +56,3 @@ Disclaimer: This software is provided "as is" with no warranty expressed or impl
     blt   $rd,   $rs,   N
     bex   T
     setx   T
-
-### Example
-See folder example for what the MIPS file should look like
