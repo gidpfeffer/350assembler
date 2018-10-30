@@ -19,7 +19,7 @@ import java.util.stream.Collectors;
  **/
 public class Assembulator implements Assembler{
 
-    private static final String ADDR_RADIX = "ADDRESS_RADIX = DEC;";
+	private static final String ADDR_RADIX = "ADDRESS_RADIX = DEC;";
 	private static final String DATA_RADIX = "DATA_RADIX = BIN;";
 
 	private static final String DEPTH_FORMAT = "DEPTH = %d;";
@@ -32,6 +32,9 @@ public class Assembulator implements Assembler{
     public static final List<String> NOOP = List.of("noop", "noop", "noop", "noop");
 	public static final Set<String> JI = Set.of(Instruction.J.getOpcode(), Instruction.JAL.getOpcode(), Instruction.BEX.getOpcode());
 	public static final Set<String> BRANCHES = Set.of(Instruction.BNE.getOpcode(), Instruction.BLT.getOpcode());
+	public static final String LABEL_MATCH_REGEX = "\\d+([a-zA-z_-]+\\d*)+";
+	public static final String LABEL_REPLACE_REGEX = "([a-zA-z_-]+\\d*)+";
+	public static final String INSTR_REMOVE_REGEX = "^\\d+";
 
 
 	private List<String> rawAssembly = new ArrayList<>();
@@ -162,20 +165,20 @@ public class Assembulator implements Assembler{
 	}
 
 	private String targetReplacer(String s, int currentPC){
-		if (!s.matches("\\d+[a-zA-z_-]+")) {
+		if (!s.matches(LABEL_MATCH_REGEX)) {
 			return s;
 		}
 		String opcode = s.substring(0,5);
 		if(JI.contains(opcode)) {
-			System.out.println("Jumping: target is " + s);
-			String encoding = s.replaceAll("[a-zA-Z_-]", ""); // delete letters
-			int address = jumpTargets.get(s.replaceAll("\\d", "")); // get target
+			System.out.println("Jumping: tar get is " + s);
+			String encoding = s.replaceAll(LABEL_REPLACE_REGEX, ""); // delete letters
+			int address = jumpTargets.get(s.replaceAll(INSTR_REMOVE_REGEX, "")); // get target
 			return encoding + Parser.toBinary(NOP_PAD * address, 27);
 		}
 		if(BRANCHES.contains(opcode)){
 			System.out.println("Branching target is " + s);
-			String encoding = s.replaceAll("[a-zA-Z_-]", ""); // delete letters
-			int T = jumpTargets.get(s.replaceAll("\\d", "")) - 1 - currentPC; // get target
+			String encoding = s.replaceAll(LABEL_REPLACE_REGEX, ""); // delete letters
+			int T = jumpTargets.get(s.replaceAll(INSTR_REMOVE_REGEX, "")) - 1 - currentPC; // get target
 			return encoding + Parser.toBinary(T, 17);
 
 		}
