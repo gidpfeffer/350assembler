@@ -10,7 +10,7 @@ Disclaimer: This software is provided "as is" with no warranty expressed or impl
 **@date: Sep 2018**  
 
 
-### About
+## About
 
 1. **What is:** this is a simple parser that converts MIPS code into machine code using the ISA provided in the Duke ECE350 handout.
 2. You need Java 10 to run this project. Find it here: https://www.oracle.com/technetwork/java/javase/downloads/java-archive-javase10-4425482.html.   
@@ -56,3 +56,15 @@ See folder example for what the MIPS file should look like
     blt   $rd,   $rs,   N
     bex   T
     setx   T
+
+## Building and Running
+
+### Running With Maven
+
+If maven is already intalled on your machine, you can compile and run the application by forking the repo, cd'ing into the root directory, and running
+
+```mvn compile exec:java```
+
+### Running with Docker
+
+X-forwarding is needed to display GUIs from Docker on local machines.
