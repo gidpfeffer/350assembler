@@ -52,7 +52,7 @@ public class GUI implements Executable{
     private BorderPane bp = new BorderPane();
     private Assembler assembler = new Assembulator();
     private TextArea log = new TextArea();
-    private ImageView title = new ImageView(new Image(this.getClass().getClassLoader().getResourceAsStream("350_Assembler.png")));
+    private ImageView title = new ImageView(new Image("file:dat/350_Assembler.png"));
     private Map<String, EventHandler<ActionEvent>> handlerMap = new HashMap<>();
 
     public GUI(Stage s){

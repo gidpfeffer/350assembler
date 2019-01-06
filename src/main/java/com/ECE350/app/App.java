@@ -1,9 +1,11 @@
+package com.ECE350.app;
+
 import gui.GUI;
 import javafx.application.Application;
 import javafx.stage.Stage;
 
 
-public class Main extends Application{
+public class App extends Application{
 
     public static void main(String[] args){
         launch(args);

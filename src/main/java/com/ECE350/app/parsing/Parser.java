@@ -37,7 +37,7 @@ public class Parser {
 	}
 	
 	
-	static String parseLType(String[] splitLine, Instruction instr) throws BadInstructionException{
+	public static String parseLType(String[] splitLine, Instruction instr) throws BadInstructionException{
 		if(instr == Instruction.WLI) {
 			if (splitLine.length != 2) {
 			    String message = String.format(BadInstructionException.MSG_TEMPLATE, "L",
@@ -80,7 +80,7 @@ public class Parser {
 		throw new BadInstructionException(message);
 	}
 	
-	static String parseJIIType(String[] splitLine, Instruction instr) throws BadInstructionException {
+	public static String parseJIIType(String[] splitLine, Instruction instr) throws BadInstructionException {
 		if (splitLine.length != 2) {
 			String message = String.format(BadInstructionException.MSG_TEMPLATE, "JII", getOriginalInstruction(splitLine),
                     String.format(BadInstructionException.ARG_MSG, 2, splitLine.length-1));
@@ -100,7 +100,7 @@ public class Parser {
         }
 	}
 	
-	static String parseJIType(String[] splitLine, Instruction instr) throws BadInstructionException {
+	public static String parseJIType(String[] splitLine, Instruction instr) throws BadInstructionException {
 		String opcode = instr.getOpcode();
 		
 		if (splitLine.length != 2) {
@@ -120,7 +120,7 @@ public class Parser {
 		return opcode + T;
 	}
 	
-	static String parseIType(String[] splitLine, Instruction instr) throws BadInstructionException{
+	public static String parseIType(String[] splitLine, Instruction instr) throws BadInstructionException{
 		
 		boolean memInstr = 
 				   instr == Instruction.LW 
@@ -185,7 +185,7 @@ public class Parser {
         return String.join(", ", splitLine);
     }
 
-    static String parseImmediate(String N) throws IllegalArgumentException{
+    public static String parseImmediate(String N) throws IllegalArgumentException{
 		int value;
 		
 		try {
@@ -204,7 +204,7 @@ public class Parser {
 	 * @param instr
 	 * @return binary encoded R type instruction 
 	 */
-	static String parseRType(String[] splitLine, Instruction instr) throws BadInstructionException {
+	public static String parseRType(String[] splitLine, Instruction instr) throws BadInstructionException {
 
 		if(splitLine.length != 4) {
             String message = String.format(BadInstructionException.MSG_TEMPLATE, "I", getOriginalInstruction(splitLine),
@@ -265,7 +265,7 @@ public class Parser {
 	 * @param shamt
 	 * @return
 	 */
-	static int parseShamt(String shamt) throws IllegalArgumentException{
+	public static int parseShamt(String shamt) throws IllegalArgumentException{
 		int value;
 		
 		try {
@@ -287,7 +287,7 @@ public class Parser {
 	 * @param regCode
 	 * @return
 	 */
-	static int parseRegister(String regCode) throws IllegalArgumentException{
+	public static int parseRegister(String regCode) throws IllegalArgumentException{
 
 		if (!regCode.contains("$")) {
 			throw new IllegalArgumentException(String.format("RegCode of %s is invalid: must start with $\n", regCode));
