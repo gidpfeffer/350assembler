@@ -71,7 +71,7 @@ X-forwarding is needed to display GUIs from Docker on local machines.
 
 #### OS X
 
-Follow guide found [here]: https://cntnr.io/running-guis-with-docker-on-mac-os-x-a14df6a76efc to set up X server on mac using socat and XQuartz. Make sure you can get xeyes to work as the guide details before moving forward. 
+Follow guide found [here](https://cntnr.io/running-guis-with-docker-on-mac-os-x-a14df6a76efc) to set up X server on mac using socat and XQuartz. Make sure you can get xeyes to work as the guide details before moving forward. 
 
 Once xeyes has been launched successfully, cd into the repo, build the docker image:
 
