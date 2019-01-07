@@ -81,9 +81,9 @@ Once xeyes has been launched successfully, cd into the repo, build the docker im
 
 And run it using X forwarding
 
-```docker run -e DISPLAY=10.197.164.115:0 assembler```
+```docker run -e DISPLAY=[LOCAL-IP]:0 assembler```
 
-To access the files while it is running, type 
+Local IP can be determined by running ```ifconfig en0``` like the guide details. To access the files while it is running, type 
 
 ```docker ps```
 
