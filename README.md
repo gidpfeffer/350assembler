@@ -69,7 +69,7 @@ If, after reading above, you would like to try the Maven approach: if maven is n
 
 ### Running with Docker (Recommended)
 
-First and foremost Docker needs to be installed. Here is where the download can be found [guide](https://docs.docker.com/v17.09/engine/installation/). Additionally, after installing Docker, X-forwarding is needed to display GUIs from Docker on local machines. This adds some nuances to each OS, (OS X, Widows, Ubuntu).
+First and foremost Docker needs to be installed. Here is where the download can be found [guide](https://docs.docker.com/v17.09/engine/installation/). Additionally, after installing Docker, X-forwarding is needed to display GUIs from Docker on local machines. Each subsection below gives resources for launching a GUI in docker on OS X, Ubuntu/Debian, and Windows devices. All have been tried and executed successfully.
 
 #### OS X
 
@@ -110,3 +110,7 @@ to see the running docker containers. Then type:
 ```docker exec -it [CONTAINER ID] bash```
 
 To launch a shell for the docker container running the assembler gui. All file can be accessed here. They can then be copy-pasted/transferred manually over the network.
+
+#### Windows
+
+A guide for running GUIs from Docker on Windows can be found [here](https://dev.to/darksmile92/run-gui-app-in-linux-docker-container-on-windows-host-4kde?fbclid=IwAR3p33nNvxwTTcJANpkfBGNTEWHP35XCXo9eMlGXFwdDYxB_kWwnsXSE2KQ).
