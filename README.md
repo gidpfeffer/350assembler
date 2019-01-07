@@ -68,3 +68,25 @@ If maven is already intalled on your machine, you can compile and run the applic
 ### Running with Docker
 
 X-forwarding is needed to display GUIs from Docker on local machines.
+
+#### OS X
+
+Follow guide found [here]: https://cntnr.io/running-guis-with-docker-on-mac-os-x-a14df6a76efc to set up X server on mac using socat and XQuartz. Make sure you can get xeyes to work as the guide details before moving forward. 
+
+Once xeyes has been launched successfully, cd into the repo, build the docker image:
+
+```docker build -t assembler .```
+
+And run it using X forwarding
+
+```docker run -e DISPLAY=10.197.164.115:0 assembler```
+
+To access the files while it is running, type 
+
+```docker ps```
+
+to see the running docker containers. Then type:
+
+```docker exec -it [CONTAINER ID] bash```
+
+To launch a shell for the docker container running the assembler gui. All file can be accessed here. They can then be copy or pasted/transferred manually over the network.
