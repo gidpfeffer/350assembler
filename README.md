@@ -61,13 +61,15 @@ See folder example for what the MIPS file should look like
 
 ### Running With Maven
 
-If maven is already intalled on your machine, you can compile and run the application by forking the repo, cd'ing into the root directory, and running
+Note, this is not guarenteed to work. Maven successfully compiles and runs the application on my machine (OS X), but I have not tried from an isolated environment. It is really inteded that the project be built and run in a Docker container. **Maven installation is not needed with the Docker approach**.
+
+If, after reading above, you would like to try the Maven approach: if maven is not installed on your machine see [installation guide 1](https://www.baeldung.com/install-maven-on-windows-linux-mac) or [installation guide 2](https://maven.apache.org/install.html) to install it. if Maven is already intalled on your machine, you can compile and run the application by forking the repo, cd'ing into the root directory, and running.
 
 ```mvn compile exec:java```
 
-### Running with Docker
+### Running with Docker (Recommended)
 
-X-forwarding is needed to display GUIs from Docker on local machines.
+First and foremost Docker needs to be installed. Here is where the download can be found [guide](https://docs.docker.com/v17.09/engine/installation/). Additionally, after installing Docker, X-forwarding is needed to display GUIs from Docker on local machines. This adds some nuances to each OS, (OS X, Widows, Ubuntu).
 
 #### OS X
 
