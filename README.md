@@ -83,7 +83,25 @@ And run it using X forwarding
 
 ```docker run -e DISPLAY=[LOCAL-IP]:0 assembler```
 
-Local IP can be determined by running ```ifconfig en0``` like the guide details. To access the files while it is running, type 
+Local IP can be determined by running ```ifconfig en0``` like the guide details.
+
+#### Ubuntu/Debian
+
+First open X server
+
+```xhost +```
+
+To build:
+
+```sudo docker build -t assembler .```
+
+And run:
+
+```sudo docker run -ti --rm -e DISPLAY=$DISPLAY -v /tmp/.X11-unix:/tmp/.X11-unix assembler```
+
+#### Accessing Files Once Running
+
+To access the files while it is running, type 
 
 ```docker ps```
 
@@ -91,4 +109,4 @@ to see the running docker containers. Then type:
 
 ```docker exec -it [CONTAINER ID] bash```
 
-To launch a shell for the docker container running the assembler gui. All file can be accessed here. They can then be copy or pasted/transferred manually over the network.
+To launch a shell for the docker container running the assembler gui. All file can be accessed here. They can then be copy-pasted/transferred manually over the network.
